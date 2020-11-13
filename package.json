@@ -1,0 +1,28 @@
+{
+  "name": "backtfg",
+  "version": "1.0.0",
+  "description": "Backend del TFG realizado en nodejs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MzSergioMartin77/TFG-Back.git"
+  },
+  "author": "Sergio Martin Ortega",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MzSergioMartin77/TFG-Back/issues"
+  },
+  "homepage": "https://github.com/MzSergioMartin77/TFG-Back#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "moment": "^2.29.1",
+    "mongoose": "^5.10.14"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  }
+}
