@@ -18,6 +18,12 @@ const UsuarioSchema = Schema({
     seguidos: Array[{ 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Usuario'
+    }],
+    peliculas: Array[{
+        pelicula: {type: mongoose.Schema.Types.ObjectId, ref: 'Pelicula'},
+        titulo: String,
+        imagen: String,
+        nota: Number
     }]
 });
 
