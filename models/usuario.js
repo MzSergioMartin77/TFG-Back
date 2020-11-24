@@ -3,6 +3,20 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const peliculaSchema = new Schema({
+    pelicula: {type: mongoose.Schema.Types.ObjectId, ref: 'Pelicula'},
+    titulo: String,
+    imagen: String,
+    nota: Number
+});
+
+const serieSchema = new Schema({
+    serie: {type: mongoose.Schema.Types.ObjectId, ref: 'Serie'},
+    titulo: String,
+    imagen: String,
+    nota: Number
+});
+
 //esquema de los datos de los usuarios
 const UsuarioSchema = Schema({
     nombre: String,
@@ -19,12 +33,8 @@ const UsuarioSchema = Schema({
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Usuario'
     }],
-    peliculas: Array[{
-        pelicula: {type: mongoose.Schema.Types.ObjectId, ref: 'Pelicula'},
-        titulo: String,
-        imagen: String,
-        nota: Number
-    }]
+    peliculas: Array[peliculaSchema],
+    serie: Array[serieSchema]
 });
 
 module.exports = mongoose.model('Usuario', UsuarioSchema);
