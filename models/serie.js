@@ -9,14 +9,14 @@ const CriticaSchema = new Schema({
     titulo: String,
     texto: String,
     fecha: Date,
-    usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'Usuario'}
+    usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'}
 });
 
 //esquema de los datos de los comentarios
 const ComentarioSchema = new Schema({
     texto: String,
     fecha: Date,
-    usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'Usuario'},
+    usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'},
     respuesta: [ComentarioSchema]
 })
 
@@ -35,14 +35,14 @@ const SerieSchema = new Schema({
     final: Number,
     actores: [{
         nombre: String,
-        profesional: {type: mongoose.Schema.Types.ObjectId, ref: 'Profesional'}
+        profesional: {type: mongoose.Schema.Types.ObjectId, ref: 'profesional'}
     }],
     directores: [{
         nombre: String,
-        profesional: {type: mongoose.Schema.Types.ObjectId, ref: 'Profesional'}
+        profesional: {type: mongoose.Schema.Types.ObjectId, ref: 'profesional'}
     }],
     criticas: [CriticaSchema],
     comentarios: [ComentarioSchema]
 });
 
-module.exports = mongoose.model('Serie', SerieSchema);
+module.exports = mongoose.model('serie', SerieSchema);

@@ -9,14 +9,14 @@ const CriticaSchema = new Schema({
     titulo: String,
     texto: String,
     fecha: Date,
-    usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'Usuario'}
+    usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'}
 });
 
 //esquema de los datos de los comentarios
 const ComentarioSchema = new Schema({
     texto: String,
     fecha: Date,
-    usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'Usuario'},
+    usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'},
     respuesta: [ComentarioSchema]
 })
 
@@ -33,14 +33,14 @@ const PeliSchema = new Schema({
     fecha_estreno: Date,
     actores: [{
         nombre: String,
-        profesional: {type: mongoose.Schema.Types.ObjectId, ref: 'Profesional'}
+        profesional: {type: mongoose.Schema.Types.ObjectId, ref: 'profesional'}
     }],
     directores: [{
         nombre: String,
-        profesional: {type: mongoose.Schema.Types.ObjectId, ref: 'Profesional'}
+        profesional: {type: mongoose.Schema.Types.ObjectId, ref: 'profesional'}
     }],
     criticas: [CriticaSchema],
     comentarios: [ComentarioSchema]
 });
 
-module.exports = mongoose.model('Pelicula', PeliSchema);
+module.exports = mongoose.model('pelicula', PeliSchema);
