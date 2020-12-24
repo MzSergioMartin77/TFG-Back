@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 mongoose.set('useFindAndModify', false);
 mongoose.set('useUnifiedTopology', true);
 
-const controller = {
+/*const controller = {
 
     saveUsuario: function(req, res) {
 
@@ -18,4 +18,4 @@ const controller = {
     getUsuario: function(req, res) {
         
     }
-}
+}*/

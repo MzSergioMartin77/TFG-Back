@@ -4,11 +4,30 @@
 var express = require('express'); //Para trabajar con rutas
 var bodyParser = require('body-parser'); //Para realizar la conversión de las poticiones
 
+const pelis_routes = require('./routes/routes');
+const cors = require('cors');
+
+const config = {
+    application: {
+        cors: {
+            server: [
+                {
+                    origin: "localhost:4200", //servidor que deseas que consuma o (*) en caso que sea acceso libre
+                    credentials: true
+                }
+            ]
+        }
+    }
+}
+
 var app = express();
 
 //middelwares, métdos que se ejecutan antes de llegar al controlador
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json()); //Pasar lo que nos llega por la url a JSON
+app.use(cors(
+    config.application.cors.server
+));
 
 //ruta de prueba 
 app.get('/prueba', (req, res) => {
@@ -16,6 +35,8 @@ app.get('/prueba', (req, res) => {
         message: 'Probando esto '
     });
 });
+
+app.use('/',pelis_routes);
 
 //exportar para poder llamar a este fichero en cualquier parte del proyecto
 module.exports = app;

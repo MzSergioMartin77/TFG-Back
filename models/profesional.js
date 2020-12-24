@@ -10,9 +10,9 @@ const ProfesionalSchema = new Schema({
     filmografia: [{
         titulo: String,
         rol: String,
-        pelicula: {type: mongoose.Schema.Types.ObjectId, ref: 'pelicula'},
-        serie: {type: mongoose.Schema.Types.ObjectId, ref: 'serie'}
+        tipo: String,
+        personaje: String,
     }]
 });
 
-module.exports = mongoose.model('profesional', ProfesionalSchema);
+module.exports = mongoose.model('profesionales', ProfesionalSchema);

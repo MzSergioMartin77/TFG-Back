@@ -19,6 +19,7 @@
   "homepage": "https://github.com/MzSergioMartin77/TFG-Back#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "moment": "^2.29.1",
     "mongoose": "^5.10.14"

@@ -17,7 +17,7 @@ const ComentarioSchema = new Schema({
     texto: String,
     fecha: Date,
     usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'},
-    respuesta: [ComentarioSchema]
+    //respuesta: [ComentarioSchema]
 })
 
 //esquema de los datos de las películas
@@ -35,14 +35,11 @@ const SerieSchema = new Schema({
     final: Number,
     actores: [{
         nombre: String,
-        profesional: {type: mongoose.Schema.Types.ObjectId, ref: 'profesional'}
+        personaje: String
     }],
-    directores: [{
-        nombre: String,
-        profesional: {type: mongoose.Schema.Types.ObjectId, ref: 'profesional'}
-    }],
+    directores: [String],
     criticas: [CriticaSchema],
     comentarios: [ComentarioSchema]
 });
 
-module.exports = mongoose.model('serie', SerieSchema);
+module.exports = mongoose.model('series', SerieSchema);
