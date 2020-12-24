@@ -7,7 +7,8 @@ mongoose.set('useUnifiedTopology', true);
 
 const controller = {
 
-    getID: function(req, res){
+    //Buscar una película por el identificador
+    getIdPeli: function(req, res){
         const peliId = req.params.id;
 
         Pelicula.findById(peliId, (err, peli) => {
@@ -27,7 +28,8 @@ const controller = {
         });
     },
 
-    getTitulo: function(req, res){
+    //Buscar una película por el título
+    getTituloPeli: function(req, res){
         const tituloparam = req.params.titulo;
 
         Pelicula.find({titulo:tituloparam}, (err, peli) => {
@@ -47,6 +49,7 @@ const controller = {
         });
     },
 
+    //Coge las 5 películas más nuevas 
     getPeliculas: function(req, res){
         
         Pelicula.find({}).sort({"fecha_estreno": -1}).limit(5).exec((err, peli) => {
