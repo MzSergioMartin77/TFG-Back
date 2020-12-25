@@ -19,7 +19,7 @@ const controller = {
             }
             if(!serie){
                 return res.status(404).send({
-                    message: "No existe ningúna Película con este identificador"
+                    message: "No existe ningúna Serie con este identificador"
                 });
             }
             return res.status(200).send({
@@ -40,7 +40,7 @@ const controller = {
             }
             if(serie == ""){
                 return res.status(404).send({
-                    message: "No existe ningúna Película con este título"
+                    message: "No existe ningúna Serie con este título"
                 });
             }
             return res.status(200).send({
@@ -49,6 +49,7 @@ const controller = {
         });
     },
 
+    //Coge las 5 series más nuevas 
     getSeries: function(req, res){
         
         Serie.find({}).sort({"inicio": -1}).limit(5).exec((err, serie) => {
@@ -59,7 +60,7 @@ const controller = {
             }
             if(!serie){
                 return res.status(404).send({
-                    message: "No hay ninguna película en la base de datos"
+                    message: "No hay ninguna serie en la base de datos"
                 });
             }
             return res.status(200).send({

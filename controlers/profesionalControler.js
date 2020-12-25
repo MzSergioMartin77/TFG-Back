@@ -19,7 +19,7 @@ const controller = {
             }
             if(!profesional){
                 return res.status(404).send({
-                    message: "No existe ningúna Película con este identificador"
+                    message: "No existe ningún Profesional con este identificador"
                 });
             }
             return res.status(200).send({
@@ -40,7 +40,7 @@ const controller = {
             }
             if(profesional == ""){
                 return res.status(404).send({
-                    message: "No existe ningúna Película con este título"
+                    message: "No existe ningún Profesional con este título"
                 });
             }
             return res.status(200).send({

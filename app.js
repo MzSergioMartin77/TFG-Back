@@ -4,7 +4,7 @@
 var express = require('express'); //Para trabajar con rutas
 var bodyParser = require('body-parser'); //Para realizar la conversión de las poticiones
 
-const pelis_routes = require('./routes/routes');
+const rutas = require('./routes/routes');
 const cors = require('cors');
 
 const config = {
@@ -36,7 +36,7 @@ app.get('/prueba', (req, res) => {
     });
 });
 
-app.use('/',pelis_routes);
+app.use('/',rutas);
 
 //exportar para poder llamar a este fichero en cualquier parte del proyecto
 module.exports = app;
