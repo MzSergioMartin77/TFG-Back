@@ -28,7 +28,6 @@ const SerieSchema = new Schema({
     nota_media: Number,
     generos: [String],
     imagen: String,
-    trailer: String,
     temporadas: Number,
     capitulos: Number,
     inicio: Number,
@@ -37,7 +36,7 @@ const SerieSchema = new Schema({
         nombre: String,
         personaje: String
     }],
-    directores: [String],
+    creadores: [String],
     criticas: [CriticaSchema],
     comentarios: [ComentarioSchema]
 });
