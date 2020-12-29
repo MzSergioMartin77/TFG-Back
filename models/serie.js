@@ -30,8 +30,8 @@ const SerieSchema = new Schema({
     imagen: String,
     temporadas: Number,
     capitulos: Number,
-    inicio: Number,
-    final: Number,
+    inicio: Date,
+    final: Date,
     actores: [{
         nombre: String,
         personaje: String
