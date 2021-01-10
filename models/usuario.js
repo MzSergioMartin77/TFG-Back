@@ -25,16 +25,16 @@ const UsuarioSchema = Schema({
     descripcion: String,
     nick: String,
     imagen: String,
-    seguidores: Array[{ 
+    seguidores: [{ 
         nick: String,
         usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'}
     }],
-    seguidos: Array[{
+    seguidos: [{
         nick: String, 
         usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'}
     }],
-    peliculas: Array[peliculaSchema],
-    series: Array[serieSchema]
+    peliculas: [peliculaSchema],
+    series: [serieSchema]
 });
 
 module.exports = mongoose.model('usuario', UsuarioSchema);

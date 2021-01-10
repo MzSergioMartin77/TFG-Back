@@ -7,6 +7,7 @@ const ProfesionalSchema = new Schema({
     nombre: String,
     biografia: String,
     imagen: String,
+    nacimiento: Date,
     filmografia: [{
         titulo: String,
         rol: String,
