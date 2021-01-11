@@ -5,6 +5,7 @@ const peliController = require('../controlers/peliculaControler');
 const serieController = require('../controlers/serieControler');
 const proController = require('../controlers/profesionalControler');
 const usuarioController = require('../controlers/usuarioControler');
+const md_aut = require('../middlewares/autenticacion');
 
 const router = express.Router();
 
@@ -23,7 +24,10 @@ router.get('/profesional/:id', proController.getIdPro);
 router.get('/profesional/n/:nombre', proController.getNombrePro);
 
 //Rutas para usuario
+router.get('/pruebas', md_aut.ensureAuth, usuarioController.pruebas);
 router.post('/registro', usuarioController.saveUsuario);
 router.post('/login', usuarioController.usuarioLogin);
+router.get('/usuario/:id', md_aut.ensureAuth, usuarioController.getIdUsuario);
+router.put('/updateUsuario/:id', md_aut.ensureAuth, usuarioController.updateUsuario);
 
 module.exports = router;
