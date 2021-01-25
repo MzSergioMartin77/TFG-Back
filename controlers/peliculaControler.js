@@ -1,9 +1,21 @@
 'use strict'
 
 const Pelicula = require('../models/pelicula');
+const Usuario = require('../models/usuario');
 const mongoose = require('mongoose');
 mongoose.set('useFindAndModify', false);
 mongoose.set('useUnifiedTopology', true);
+
+  function redondeo(value, exp){
+    value = +value;
+    exp = +exp;
+
+    value = value.toString().split('e');
+    value = Math['round'](+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
+
+    value = value.toString().split('e');
+    return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
+  }
 
 const controller = {
 
@@ -66,6 +78,72 @@ const controller = {
             return res.status(200).send({
                 pelicula
             });
+        });
+    },
+
+    saveCritica: function(req, res){
+        const params = req.body;
+        console.log(params);
+        const peliId = params.peliculaId;
+        const usuarioId = params.usuarioId;
+        const fecha = new Date();
+        let notaMedia = 0;
+
+        function notaPelicula(pelicula){
+            let notas = 0;
+            let n = 0;
+            pelicula.criticas.forEach(element => {
+                notas = notas+element.nota;
+                n++;
+            });
+            console.log(notas);
+            notaMedia = notas/n;
+            console.log(notaMedia);
+        }
+
+        Pelicula.findById(peliId, (err, pelicula) => {
+            if(err){
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            }else {
+                Usuario.findById(usuarioId, (err, usuario) => {
+                    if(err){
+                        console.log("cosas");
+                        return res.status(500).send({
+                            message: "Error al mostrar los datos"
+                        });
+                    }else {
+                        pelicula.criticas.push({nota: params.nota, titulo: params.titulo,
+                            texto: params.texto, fecha: fecha, usuario: usuarioId});
+                        
+                        usuario.peliculas.push({titulo: pelicula.titulo, imagen: pelicula.imagen, 
+                            nota: params.nota, pelicula: peliId});
+                        pelicula.save();
+                        usuario.save();
+                        notaPelicula(pelicula);
+                        notaMedia = redondeo(notaMedia, -1);
+                        console.log(notaMedia);
+                        let notaUp = {
+                            $set: {
+                              nota_media: notaMedia
+                            }
+                        };
+                        Pelicula.findByIdAndUpdate(peliId,  notaUp, {new: true}, (err, notaUpdate) => {
+                            if(err){
+                                return res.status(500).send({
+                                    message: "Error al guardar la nota media"
+                                });
+                            }else {
+                                return res.status(200).send({
+                                    message: "Guardados"
+                                });
+                            }
+                        });
+                        
+                    }
+                });
+            }
         });
     }
 

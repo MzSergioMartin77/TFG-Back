@@ -17,7 +17,7 @@ const ComentarioSchema = new Schema({
     texto: String,
     fecha: Date,
     usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'},
-    //respuesta: [ComentarioSchema]
+    respuesta: [{type: mongoose.Schema.Types.ObjectId, ref: 'comentario'}]
 })
 
 //esquema de los datos de las películas
