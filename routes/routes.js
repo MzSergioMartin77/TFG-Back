@@ -13,13 +13,13 @@ const router = express.Router();
 router.get('/pelicula/:id', peliController.getIdPeli);
 router.get('/pelicula/t/:titulo', peliController.getTituloPeli);
 router.get('/peliculas', peliController.getPeliculas);
-router.post('/peliCritica', peliController.saveCritica);
+router.post('/peliCritica', md_aut.ensureAuth, peliController.saveCritica);
 
 //Rutas para series
 router.get('/serie/:id', serieController.getIdSerie);
 router.get('/serie/t/:titulo',serieController.getTituloSerie);
 router.get('/series',serieController.getSeries);
-router.post('/serieCritica', serieController.saveCritica);
+router.post('/serieCritica',md_aut.ensureAuth, serieController.saveCritica);
 
 //Rutas para profesionales
 router.get('/profesional/:id', proController.getIdPro);
