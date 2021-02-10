@@ -114,7 +114,7 @@ const controller = {
                             message: "Error al mostrar los datos"
                         });
                     }else {
-                        pelicula.criticas.push({nota: params.nota, titulo: params.titulo,
+                        pelicula.criticas.push({nota: params.nota, nick:usuario.nick, titulo: params.titulo,
                             texto: params.texto, fecha: fecha, usuario: usuarioId});
                         
                         usuario.peliculas.push({titulo: pelicula.titulo, imagen: pelicula.imagen, 
@@ -136,11 +136,42 @@ const controller = {
                                 });
                             }else {
                                 return res.status(200).send({
-                                    message: "Guardados"
+                                    message: "Guardado"
                                 });
                             }
                         });
                         
+                    }
+                });
+            }
+        });
+    },
+
+    saveComentario: function(req, res){
+        const params = req.body;
+        console.log(params);
+        const peliId = params.peliculaId;
+        const usuarioId = params.usuarioId;
+        const fecha = new Date();
+
+        Pelicula.findById(peliId, (err, pelicula) => {
+            if(err){
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            }else {
+                Usuario.findById(usuarioId, (err, usuario) => {
+                    if(err){
+                        console.log("cosas");
+                        return res.status(500).send({
+                            message: "Error al mostrar los datos"
+                        });
+                    }else {
+                        pelicula.comentarios.push({nick:usuario.nick, texto: params.texto, fecha: fecha, usuario: usuarioId});
+                        pelicula.save();
+                        return res.status(200).send({
+                            message: "Guardado"
+                        });
                     }
                 });
             }

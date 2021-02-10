@@ -10,7 +10,7 @@ const jwt = require('../services/jwt');
 
 const controller = {
 
-    pruebas: function(req, res){
+    pruebas: function (req, res) {
         return res.status(200).send({ message: 'Prueba de funcionamiento' });
     },
 
@@ -25,35 +25,39 @@ const controller = {
             usuario.descripcion = params.descripcion;
             usuario.imagen = null;
 
-            Usuario.find({
-                $or: [
-                    { email: usuario.email.toLowerCase() },
-                    { nick: usuario.nick }
-                ]
-            }).exec((err, usuarios) => {
-                if (err) return res.status(500).send({ message: 'Error al comprobar el email y el nick' });
+            Usuario.find({ email: usuario.email.toLowerCase() }).exec((err, usuarios) => {
+                if (err) return res.status(500).send({ message: 'Error al buscar' });
 
                 if (usuarios && usuarios.length >= 1) {
-                    return res.status(200).send({ message: 'El usuario ya existe' });
+                    return res.status(200).send({ message: 'Email-Error' });
                 }
                 else {
-                    /* Se utiliza la libreria bcrypt para realizar un hash sobre la contraseña
-                        y la variable rondas inidca el número de hashes que se realizan en ella en 
-                        este caso realizamos 10 para que sea más seguro */
-                    bcrypt.hash(params.pass, rondas, (err, hash) => {
-                        usuario.pass = hash;
+                    Usuario.find({ nick: usuario.nick }).exec((err, usuarios) => {
+                        if (err) return res.status(500).send({ message: 'Error al buscar' });
 
-                        usuario.save((err, usuarioS) => {
-                            if (err) {
-                                return res.status(500).send({ message: 'Error al guardar el usuario' });
-                            }
-                            if (!usuarioS) {
-                                res.status(404).send({ message: 'El usuario no se ha registrado' });
-                            }
-                            else {
-                                res.status(200).send({ usuario: usuarioS });
-                            }
-                        });
+                        if (usuarios && usuarios.length >= 1) {
+                            return res.status(200).send({ message: 'Nick-Error' });
+                        }
+                        else{
+                            /* Se utiliza la libreria bcrypt para realizar un hash sobre la contraseña
+                            y la variable rondas inidca el número de hashes que se realizan en ella en 
+                            este caso realizamos 10 para que sea más seguro */
+                            bcrypt.hash(params.pass, rondas, (err, hash) => {
+                                usuario.pass = hash;
+        
+                                usuario.save((err, usuarioS) => {
+                                    if (err) {
+                                        return res.status(500).send({ message: 'Error al guardar el usuario' });
+                                    }
+                                    if (!usuarioS) {
+                                        res.status(404).send({ message: 'El usuario no se ha registrado' });
+                                    }
+                                    else {
+                                        res.status(200).send({ usuario: usuarioS });
+                                    }
+                                });
+                            });
+                        }
                     });
                 }
             })
@@ -104,16 +108,16 @@ const controller = {
 
     },
 
-    getIdUsuario: function(req, res){
+    getIdUsuario: function (req, res) {
         const userId = req.params.id;
 
         Usuario.findById(userId, (err, usuario) => {
-            if(err){
+            if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
                 });
             }
-            if(!usuario){
+            if (!usuario) {
                 return res.status(404).send({
                     message: "No existe ningúna usuario con este identificador"
                 });
@@ -124,25 +128,25 @@ const controller = {
         });
     },
 
-    updateUsuario: function(req, res){
+    updateUsuario: function (req, res) {
         const userId = req.params.id;
         let update = req.body;
 
         delete update.pass;
 
-        if(userId != req.usuario.sub){
+        if (userId != req.usuario.sub) {
             return res.status(500).send({
                 message: "No tienes permisos para modificar los datos"
             });
         }
 
-        Usuario.findByIdAndUpdate(userId, update, {new: true}, (err, userUpdate) => {
-            if(err){
+        Usuario.findByIdAndUpdate(userId, update, { new: true }, (err, userUpdate) => {
+            if (err) {
                 return res.status(500).send({
                     message: "Error al actualizar los datos"
                 });
             }
-            if(!userUpdate){
+            if (!userUpdate) {
                 return res.status(404).send({
                     message: "No se ha podido actualizar al usuario"
                 });
