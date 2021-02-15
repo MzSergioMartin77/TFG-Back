@@ -154,7 +154,7 @@ const controller = {
             return res.status(200).send({
                 usuario: userUpdate
             });
-        })
+        });
     }
 }
 

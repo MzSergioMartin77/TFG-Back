@@ -156,6 +156,136 @@ const controller = {
         });
     },
 
+    updateCritica: function (req, res) {
+        const params = req.body;
+        console.log('primero')
+        const serieId = params.serieId;
+        const usuarioId = params.usuarioId;
+        const fecha = new Date();
+        let notaMedia = 0;
+
+        Serie.findById(serieId, (err, serie) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            } else {
+                Usuario.findById(usuarioId, (err, usuario) => {
+                    if (err) {
+                        return res.status(500).send({
+                            message: "Error al mostrar los datos"
+                        });
+                    } else {
+                        serie.criticas.forEach((element, index) => {
+                            console.log(element.titulo);
+                            if (element.usuario == usuarioId) {
+                                serie.criticas.set(index, {
+                                    nota: params.nota, nick: usuario.nick, titulo: params.titulo,
+                                    texto: params.texto, fecha: fecha, usuario: usuarioId
+                                });
+                            }
+                        });
+
+                        usuario.series.forEach((element, index) => {
+                            console.log('Criticas');
+                            if (element.serie == serieId) {
+                                usuario.series.set(index, {
+                                    titulo: pelicula.titulo, imagen: pelicula.imagen,
+                                    nota: params.nota, serie: serieId
+                                });
+                            }
+                        });
+                        console.log('-------');
+                        serie.save();
+                        usuario.save();
+                        notaMedia = notaPelicula(serie);
+                        notaMedia = redondeo(notaMedia, -1);
+                        console.log(notaMedia);
+                        let notaUp = {
+                            $set: {
+                                nota_media: notaMedia
+                            }
+                        };
+                        Serie.findByIdAndUpdate(serieId, notaUp, { new: true }, (err, notaUpdate) => {
+                            if (err) {
+                                return res.status(500).send({
+                                    message: "Error al guardar la nota media"
+                                });
+                            } else {
+                                return res.status(200).send({
+                                    message: "Guardado"
+                                });
+                            }
+                        });
+
+                    }
+                });
+            }
+        });
+    },
+
+    deleteCritica: function (req, res) {
+        const params = req.body;
+        const serieId = params.serieId;
+        const usuarioId = params.usuarioId;
+        let notaMedia = 0;
+
+        Pelicula.findById(serieId, (err, serie) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            } else {
+                Usuario.findById(usuarioId, (err, usuario) => {
+                    if (err) {
+                        return res.status(500).send({
+                            message: "Error al mostrar los datos"
+                        });
+                    } else {
+                        serie.criticas.forEach((element) => {
+                            if (element.usuario == usuarioId) {
+                                element.remove();
+                            }
+                        });
+
+                        usuario.series.forEach((element) => {
+                            if (element.serie == serieId) {
+                                element.remove();
+                            }
+                        });
+                        console.log('-------');
+                        serie.save();
+                        usuario.save();
+                        console.log(notaMedia);
+                        notaMedia = notaPelicula(serie);
+                        if (notaMedia != null) {
+                            notaMedia = redondeo(notaMedia, -1);
+                        }
+                        console.log(notaMedia);
+                        let notaUp = {
+                            $set: {
+                                nota_media: notaMedia
+                            }
+                        };
+                        Pelicula.findByIdAndUpdate(serieId, notaUp, { new: true }, (err, notaUpdate) => {
+                            if (err) {
+                                return res.status(500).send({
+                                    message: "Error al guardar la nota media"
+                                });
+                            } else {
+                                return res.status(200).send({
+                                    message: "Guardado"
+                                });
+                            }
+                        });
+
+                    }
+                });
+            }
+        });
+
+    },
+
     saveComentario: function(req, res){
         const params = req.body;
         console.log(params);
