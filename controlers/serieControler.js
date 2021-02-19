@@ -93,6 +93,34 @@ const controller = {
         });
     },
 
+    //Buscar una crítica de una serie
+    getCritica: function (req, res){
+        const serieId = req.params.serie;
+        const criticaId = req.params.critica;
+
+        Serie.findById(serieId, (err, serie) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            }
+            else{
+                const critica = serie.criticas.id(criticaId);
+                console.log(critica);
+                if (!critica) {
+                    return res.status(404).send({
+                        message: "No existe ningúna Crítica con este identificador"
+                    });
+                }
+                console.log(critica);
+                return res.status(200).send({
+                    critica
+                });
+            }
+            
+        });
+    },
+
     //Guardar una crítica nueva en el documento embebido de crítica
     saveCritica: function (req, res) {
         const params = req.body;
@@ -156,11 +184,13 @@ const controller = {
         });
     },
 
+    //Actualizar la crítica 
     updateCritica: function (req, res) {
         const params = req.body;
         console.log('primero')
         const serieId = params.serieId;
-        const usuarioId = params.usuarioId;
+        const usuarioId = params.usuario;
+        console.log(usuarioId);
         const fecha = new Date();
         let notaMedia = 0;
 
@@ -190,7 +220,7 @@ const controller = {
                             console.log('Criticas');
                             if (element.serie == serieId) {
                                 usuario.series.set(index, {
-                                    titulo: pelicula.titulo, imagen: pelicula.imagen,
+                                    titulo: serie.titulo, imagen: serie.imagen,
                                     nota: params.nota, serie: serieId
                                 });
                             }
@@ -224,13 +254,13 @@ const controller = {
         });
     },
 
+    //Eliminar la crítica 
     deleteCritica: function (req, res) {
-        const params = req.body;
-        const serieId = params.serieId;
-        const usuarioId = params.usuarioId;
+        const serieId = req.params.serie;
+        const usuarioId = req.params.usuario;
         let notaMedia = 0;
 
-        Pelicula.findById(serieId, (err, serie) => {
+        Serie.findById(serieId, (err, serie) => {
             if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
@@ -267,14 +297,14 @@ const controller = {
                                 nota_media: notaMedia
                             }
                         };
-                        Pelicula.findByIdAndUpdate(serieId, notaUp, { new: true }, (err, notaUpdate) => {
+                        Serie.findByIdAndUpdate(serieId, notaUp, { new: true }, (err, notaUpdate) => {
                             if (err) {
                                 return res.status(500).send({
                                     message: "Error al guardar la nota media"
                                 });
                             } else {
                                 return res.status(200).send({
-                                    message: "Guardado"
+                                    message: "Eliminada"
                                 });
                             }
                         });
@@ -286,6 +316,7 @@ const controller = {
 
     },
 
+    //Guardar comentario
     saveComentario: function(req, res){
         const params = req.body;
         console.log(params);

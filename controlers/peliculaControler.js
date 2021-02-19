@@ -26,7 +26,6 @@ function notaPelicula(pelicula) {
         return null;
     }else{
         pelicula.criticas.forEach(element => {
-            console.log("noooo");
             notas = notas + element.nota;
             n++;
         });
@@ -98,6 +97,33 @@ const controller = {
         });
     },
 
+    getCritica: function (req, res){
+        const peliId = req.params.pelicula;
+        const criticaId = req.params.critica;
+
+        Pelicula.findById(peliId, (err, pelicula) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            }
+            else{
+                const critica = pelicula.criticas.id(criticaId);
+                console.log(critica);
+                if (!critica) {
+                    return res.status(404).send({
+                        message: "No existe ningúna Crítica con este identificador"
+                    });
+                }
+                console.log(critica);
+                return res.status(200).send({
+                    critica
+                });
+            }
+            
+        });
+    },
+
     saveCritica: function (req, res) {
         const params = req.body;
         console.log(params);
@@ -149,7 +175,6 @@ const controller = {
                                 });
                             }
                         });
-
                     }
                 });
             }
@@ -160,7 +185,7 @@ const controller = {
         const params = req.body;
         console.log('primero')
         const peliId = params.peliculaId;
-        const usuarioId = params.usuarioId;
+        const usuarioId = params.usuario;
         const fecha = new Date();
         let notaMedia = 0;
 
@@ -225,9 +250,8 @@ const controller = {
     },
 
     deleteCritica: function (req, res) {
-        const params = req.body;
-        const peliId = params.peliculaId;
-        const usuarioId = params.usuarioId;
+        const peliId = req.params.pelicula;
+        const usuarioId = req.params.usuario;
         let notaMedia = 0;
 
         Pelicula.findById(peliId, (err, pelicula) => {
@@ -274,7 +298,7 @@ const controller = {
                                 });
                             } else {
                                 return res.status(200).send({
-                                    message: "Guardado"
+                                    message: "Eliminada"
                                 });
                             }
                         });
