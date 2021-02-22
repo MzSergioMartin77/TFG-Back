@@ -152,8 +152,128 @@ const controller = {
                 });
             }
             return res.status(200).send({
-                usuario: userUpdate
+                userUpdate
             });
+        });
+    },
+
+    seguirUsuario: function (req, res){
+        const identificadoId = req.params.identificado;
+        const usuarioId = req.params.usuario;
+        let status = true;
+        
+        Usuario.findById(identificadoId, (err, identificado) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            }
+            else if (!identificado) {
+                return res.status(404).send({
+                    message: "No existe ningúna usuario con este identificador"
+                });
+            }else{
+                Usuario.findById(usuarioId, (err, usuario) => {
+                    if (err) {
+                        return res.status(500).send({
+                            message: "Error al mostrar los datos"
+                        });
+                    }
+                    else if (!usuario) {
+                        return res.status(404).send({
+                            message: "No existe ningúna usuario con este identificador"
+                        });
+                    }else{
+                        console.log(identificado.seguidos.length);
+                        for(let i=0; i<identificado.seguidos.length; i++){
+                            if(identificado.seguidos[i].usuario == usuarioId){
+                                console.log('Ya esta');
+                                status = false;
+                                break;
+                            }
+                        }
+                        if(status){
+                            identificado.seguidos.push({
+                                nick: usuario.nick, usuario: usuarioId
+                            });
+                            usuario.seguidores.push({
+                                nick: identificado.nick, usuario: identificadoId
+                            });
+                            identificado.save();
+                            usuario.save();
+                            return res.status(200).send({
+                                message: "Guardado"
+                            });
+                        }else{
+                            return res.status(404).send({
+                                message: "Ya sigue ha este usuario"
+                            });
+                        }
+                    }  
+                });
+            }
+            
+        });
+    },
+
+    dejarSeguir: function (req, res){
+        const identificadoId = req.params.identificado;
+        const usuarioId = req.params.usuario;
+        let status1 = false;
+        let status2 = false;
+
+        Usuario.findById(identificadoId, (err, identificado) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            }
+            else if (!identificado) {
+                return res.status(404).send({
+                    message: "No existe ningúna usuario con este identificador"
+                });
+            }else{
+                Usuario.findById(usuarioId, (err, usuario) => {
+                    if (err) {
+                        return res.status(500).send({
+                            message: "Error al mostrar los datos"
+                        });
+                    }
+                    else if (!usuario) {
+                        return res.status(404).send({
+                            message: "No existe ningúna usuario con este identificador"
+                        });
+                    }else{
+                        console.log(identificado.seguidos.length);
+                        for(let i=0; i<identificado.seguidos.length; i++){
+                            if(identificado.seguidos[i].usuario == usuarioId){
+                                status1 = true;
+                                identificado.seguidos[i].remove();                               
+                                break;
+                            }
+                        }
+                        for(let i=0; i<usuario.seguidores.length; i++){
+                            if(usuario.seguidores[i].usuario == identificadoId){
+                                status2 = true;
+                                usuario.seguidores[i].remove();
+                                break;
+                            }
+                        }
+                        if(status1 && status2){
+                            identificado.save();
+                            usuario.save();
+                            return res.status(200).send({
+                                message: "Guardado"
+                            });
+                        }else{
+                            return res.status(404).send({
+                                message: "Algo ha fallado"
+                            });
+                        }
+                    }  
+                });
+            }
+            
         });
     }
 }

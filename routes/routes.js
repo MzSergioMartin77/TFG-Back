@@ -39,6 +39,9 @@ router.get('/pruebas', md_aut.ensureAuth, usuarioController.pruebas);
 router.post('/registro', usuarioController.saveUsuario);
 router.post('/login', usuarioController.usuarioLogin);
 router.get('/usuario/:id', md_aut.ensureAuth, usuarioController.getIdUsuario);
+router.get('/otroUsuario/:id', usuarioController.getIdUsuario);
 router.put('/updateUsuario/:id', md_aut.ensureAuth, usuarioController.updateUsuario);
+router.get('/seguir/:identificado/:usuario', md_aut.ensureAuth, usuarioController.seguirUsuario);
+router.delete('/dejarSeguir/:identificado/:usuario', md_aut.ensureAuth, usuarioController.dejarSeguir);
 
 module.exports = router;
