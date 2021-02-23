@@ -73,6 +73,27 @@ const controller = {
         });
     },
 
+    getBuscarSerie: function (req, res) {
+        const tituloparam = req.params.titulo;
+        let buscar = "(?i)"+tituloparam;
+
+        Serie.find({ titulo: {$regex: buscar} }, (err, serie) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            }
+            if (serie == "") {
+                return res.status(404).send({
+                    message: "No existe ningúna Serie con este título"
+                });
+            }
+            return res.status(200).send({
+                serie
+            });
+        });
+    },
+
     //Coge las 5 series más nuevas 
     getSeries: function (req, res) {
 

@@ -77,6 +77,27 @@ const controller = {
         });
     },
 
+    getBuscarPeli: function (req, res) {
+        const tituloparam = req.params.titulo;
+        let buscar = "(?i)"+tituloparam;
+
+        Pelicula.find({ titulo: {$regex: buscar} }, (err, pelicula) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            }
+            if (pelicula == "") {
+                return res.status(404).send({
+                    message: "No existe ningúna Película con este título"
+                });
+            }
+            return res.status(200).send({
+                pelicula
+            });
+        });
+    },
+
     //Coge las 5 películas más nuevas 
     getPeliculas: function (req, res) {
 

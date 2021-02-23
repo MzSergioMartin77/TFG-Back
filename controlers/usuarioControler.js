@@ -108,6 +108,27 @@ const controller = {
 
     },
 
+    getNickUsuario: function(req, res){
+        const nickParam = req.params.nick;
+        let buscar = "(?i)"+nickParam;
+
+        Usuario.find({ nick: {$regex: buscar} }, (err, usuario) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            }
+            if (usuario == "") {
+                return res.status(404).send({
+                    message: "No existe ningún Usuario con este nick"
+                });
+            }
+            return res.status(200).send({
+                usuario
+            });
+        });
+    },
+
     getIdUsuario: function (req, res) {
         const userId = req.params.id;
 
