@@ -7,6 +7,9 @@ mongoose.set('useUnifiedTopology', true);
 const bcrypt = require('bcrypt');
 const rondas = 10;
 const jwt = require('../services/jwt');
+const fs = require('fs');
+const path = require('path');
+const { exists } = require('../models/usuario');
 
 const controller = {
 
@@ -296,6 +299,78 @@ const controller = {
             }
             
         });
+    },
+
+    uploadImagen: function(req, res) {
+        const userId = req.params.usuario;
+
+        if(req.files){
+            let file_path = req.files.imagen.path;
+            let file_split = file_path.split('\\');
+            console.log(file_split);
+
+            let file_name = file_split[2];
+            console.log(file_name);
+            let ext_split = file_name.split('\.');
+            let file_ext = ext_split[1];
+            console.log(file_ext);
+
+            if (userId != req.usuario.sub) {
+                console.log('fallo');
+                return fs.unlink(file_path, () => {
+                    return res.status(200).send({
+                        message: "No tienes permisos para poner una imagen de perfil"
+                    });
+                });
+            }
+
+            if(file_ext === 'jpg' || file_ext === 'JPG' || file_ext === 'png' || file_ext === 'PNG'
+             || file_ext === 'jpeg' || file_ext === 'JPEG' || file_ext === 'gif' || file_ext === 'GIF'){
+                return Usuario.findByIdAndUpdate(userId, { imagen: file_name }, {new: true}, (err, userUpdate) => {
+                    if (err) {
+                        return res.status(500).send({
+                            message: "Error al actualizar los datos"
+                        });
+                    }
+                    if (!userUpdate) {
+                        return res.status(404).send({
+                            message: "No se ha podido actualizar al usuario"
+                        });
+                    }
+                    return res.status(200).send({
+                        userUpdate
+                    });
+                });
+            }
+            else {
+                return fs.unlink(file_path, () => {
+                    return res.status(200).send({
+                        message: "La extensión no es válida"
+                    });
+                }); 
+                           
+            }
+        }
+        else {
+            return res.status(200).send({
+                message: "No se ha subido ningúna imagen"
+            }); 
+        }
+    },
+
+    getImagen: function (req, res) {
+        const imagen_file = req.params.imagen;
+        const file = './imagen/usuario/'+imagen_file;
+
+        fs.access(file, (err) => {
+            console.log(file);
+            if(err){
+                console.log('entra');
+                res.status(200).send({message: 'No existe la imagen'});
+            } else{
+                res.sendFile(path.resolve(file));
+            }
+        })
     }
 }
 

@@ -114,6 +114,43 @@ const controller = {
         });
     },
 
+    //Buscar una crítica usando el id del usuario
+    getCriticaUser: function (req, res){
+        const serieId = req.params.serie;
+        const userId = req.params.usuario;
+
+        Serie.findById(serieId, (err, serie) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            } else if(!serie){
+                return res.status(404).send({
+                    message: "No hay ninguna serie con este identificador en la base de datos"
+                });
+            }
+            else{
+                for(let i=0; i<serie.criticas.length; i++){
+                    if(serie.criticas[i].usuario == userId){
+                        if(serie.criticas[i].texto != null){
+                            return res.status(200).send({
+                                critica: serie.criticas[i]
+                            }); 
+                        } else{
+                            return res.status(200).send({
+                                message: "Nada"
+                            });
+                        }
+                    }
+                }
+                return res.status(200).send({
+                    message: "Nada"
+                }); 
+            }
+            
+        });
+    },
+
     //Buscar una crítica de una serie
     getCritica: function (req, res){
         const serieId = req.params.serie;
@@ -123,6 +160,11 @@ const controller = {
             if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
+                });
+            }
+            else if(!serie){
+                return res.status(404).send({
+                    message: "No hay ninguna serie con este identificador en la base de datos"
                 });
             }
             else{

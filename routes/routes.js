@@ -7,6 +7,9 @@ const proController = require('../controlers/profesionalControler');
 const usuarioController = require('../controlers/usuarioControler');
 const md_aut = require('../middlewares/autenticacion');
 
+const multipart = require('connect-multiparty');
+const md_imagen = multipart({uploadDir: './imagen/usuario'});
+
 const router = express.Router();
 
 //Rutas para películas
@@ -19,6 +22,7 @@ router.put('/criticaPupdate', md_aut.ensureAuth, peliController.updateCritica);
 router.delete('/deletePcritica/:pelicula/:usuario', md_aut.ensureAuth, peliController.deleteCritica);
 router.get('/criticaPeli/:pelicula/:critica', peliController.getCritica);
 router.get('/buscarPeli/:titulo', peliController.getBuscarPeli);
+router.get('/criticaPeliUser/:pelicula/:usuario', peliController.getCriticaUser);
 
 //Rutas para series
 router.get('/serie/:id', serieController.getIdSerie);
@@ -31,6 +35,7 @@ router.put('/criticaSupdate', md_aut.ensureAuth, serieController.updateCritica);
 router.delete('/deleteScritica/:serie/:usuario', md_aut.ensureAuth, serieController.deleteCritica);
 router.get('/criticaSerie/:serie/:critica', serieController.getCritica);
 router.get('/buscarSerie/:titulo', serieController.getBuscarSerie);
+router.get('/criticaSerieUser/:serie/:usuario', serieController.getCriticaUser);
 
 //Rutas para profesionales
 router.get('/profesional/:id', proController.getIdPro);
@@ -47,5 +52,7 @@ router.get('/otroUsuario/:id', usuarioController.getIdUsuario);
 router.put('/updateUsuario/:id', md_aut.ensureAuth, usuarioController.updateUsuario);
 router.get('/seguir/:identificado/:usuario', md_aut.ensureAuth, usuarioController.seguirUsuario);
 router.delete('/dejarSeguir/:identificado/:usuario', md_aut.ensureAuth, usuarioController.dejarSeguir);
+router.post('/uploadImagen/:usuario', [md_aut.ensureAuth, md_imagen], usuarioController.uploadImagen);
+router.get('/getImagen/:imagen', usuarioController.getImagen);
 
 module.exports = router;
