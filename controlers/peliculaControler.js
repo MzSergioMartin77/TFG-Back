@@ -98,10 +98,10 @@ const controller = {
         });
     },
 
-    //Coge las 5 películas más nuevas 
+    //Coge las 6 películas más nuevas 
     getPeliculas: function (req, res) {
 
-        Pelicula.find({}).sort({ "fecha_estreno": -1 }).limit(5).exec((err, pelicula) => {
+        Pelicula.find({}).sort({ "fecha_estreno": -1 }).limit(6).exec((err, pelicula) => {
             if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
@@ -121,12 +121,6 @@ const controller = {
     getCriticaUser: function (req, res) {
         const peliId = req.params.pelicula;
         const userId = req.params.usuario;
-
-        if (userId != req.usuario.sub) {
-            return res.status(500).send({
-                message: "No tienes permisos para escribir una crítica"
-            });
-        }
 
         Pelicula.findById(peliId, (err, pelicula) => {
             if (err) {

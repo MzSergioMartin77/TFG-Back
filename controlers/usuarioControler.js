@@ -9,7 +9,6 @@ const rondas = 10;
 const jwt = require('../services/jwt');
 const fs = require('fs');
 const path = require('path');
-const { exists } = require('../models/usuario');
 
 const controller = {
 
@@ -225,6 +224,7 @@ const controller = {
                             });
                             identificado.save();
                             usuario.save();
+                            console.log('seguir');
                             return res.status(200).send({
                                 message: "Guardado"
                             });

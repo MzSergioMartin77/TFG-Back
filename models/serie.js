@@ -24,6 +24,7 @@ const ComentarioSchema = new Schema({
 
 //esquema de los datos de las películas
 const SerieSchema = new Schema({
+    id_serie: Number,
     titulo: String,
     titulo_original: String,
     sinopsis: String,
@@ -39,6 +40,10 @@ const SerieSchema = new Schema({
         personaje: String
     }],
     creadores: [String],
+    plataformas: [{
+        nombre: String,
+        icono: String
+    }],
     criticas: [CriticaSchema],
     comentarios: [ComentarioSchema]
 });

@@ -24,6 +24,7 @@ const ComentarioSchema = new Schema({
 
 //esquema de los datos de las películas
 const PeliSchema = new Schema({
+    id_peli: Number,
     titulo: String,
     titulo_original: String,
     sinopsis: String,
@@ -36,6 +37,10 @@ const PeliSchema = new Schema({
     actores: [{
         nombre: String,
         personaje: String
+    }],
+    plataformas: [{
+        nombre: String,
+        icono: String
     }],
     directores: [String],
     criticas: [CriticaSchema],

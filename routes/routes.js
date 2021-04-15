@@ -28,14 +28,15 @@ router.get('/criticaPeliUser/:pelicula/:usuario', peliController.getCriticaUser)
 router.get('/serie/:id', serieController.getIdSerie);
 router.get('/serie/t/:titulo',serieController.getTituloSerie);
 router.get('/series',serieController.getSeries);
-router.post('/serieCritica', md_aut.ensureAuth, serieController.saveCritica);
+//router.post('/serieCritica', md_aut.ensureAuth, serieController.saveCritica);
 router.post('/serieComentario', md_aut.ensureAuth, serieController.saveComentario);
-router.post('/critica', serieController.middlewareCritica);
+router.post('/serieCritica', md_aut.ensureAuth, serieController.middlewareCritica);
 router.put('/criticaSupdate', md_aut.ensureAuth, serieController.updateCritica);
 router.delete('/deleteScritica/:serie/:usuario', md_aut.ensureAuth, serieController.deleteCritica);
 router.get('/criticaSerie/:serie/:critica', serieController.getCritica);
 router.get('/buscarSerie/:titulo', serieController.getBuscarSerie);
 router.get('/criticaSerieUser/:serie/:usuario', serieController.getCriticaUser);
+router.post('/serieNota', md_aut.ensureAuth, serieController.middlewareNota);
 
 //Rutas para profesionales
 router.get('/profesional/:id', proController.getIdPro);
