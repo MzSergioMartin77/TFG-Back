@@ -185,84 +185,50 @@ const controller = {
         });
     },
 
-    saveCritica: function (req, res) {
-        const params = req.body;
+    saveCritica: function (params, pelicula, res) {
         const peliId = params.peliculaId;
-        const usuarioId = params.usuarioId;
+        const usuarioId = params.usuario;
         const fecha = new Date();
         let notaMedia = 0;
-        let status = true;
 
-        if (usuarioId != req.usuario.sub) {
-            return res.status(500).send({
-                message: "No tienes permisos para escribir una crítica"
-            });
-        }
 
-        Pelicula.findById(peliId, (err, pelicula) => {
+        Usuario.findById(usuarioId, (err, usuario) => {
             if (err) {
+                console.log("cosas");
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
                 });
-            } else if (!pelicula) {
+            } else if (!usuario) {
                 return res.status(404).send({
-                    message: "Esta película no se encuentra en la plataforma"
+                    message: "Este usuario no se encuentra en la plataforma"
                 });
-            }
-            else {
-                for (let i = 0; i < pelicula.criticas.length; i++) {
-                    if (pelicula.criticas[i].usuario == usuarioId) {
-                        if (pelicula.criticas[i].texto != null) {
-                            status = false;
-                            break;
-                        }
-                    }
-                }
-                if (!status) {
-                    return res.status(404).send({
-                        message: "Este usuario ya tiene escrita una crítica de esta película"
-                    });
-                } 
-                else { 
-                    Usuario.findById(usuarioId, (err, usuario) => {
-                        if (err) {
-                            console.log("cosas");
-                            return res.status(500).send({
-                                message: "Error al mostrar los datos"
-                            });
-                        } else if(!usuario){
-                            return res.status(404).send({
-                                message: "Este usuario no se encuentra en la plataforma"
-                            });
-                        } else {
-                            pelicula.criticas.push({
-                                nota: params.nota, nick: usuario.nick, titulo: params.titulo,
-                                texto: params.texto, fecha: fecha, usuario: usuarioId
-                            });
+            } else {
+                console.log('entra');
+                pelicula.criticas.push({
+                    nota: params.nota, nick: usuario.nick, titulo: params.titulo,
+                    texto: params.texto, fecha: fecha, usuario: usuarioId
+                });
 
-                            usuario.peliculas.push({
-                                titulo: pelicula.titulo, imagen: pelicula.imagen,
-                                nota: params.nota, pelicula: peliId
-                            });
-                            pelicula.save();
-                            usuario.save();
-                            notaMedia = notaPelicula(pelicula);
-                            notaMedia = redondeo(notaMedia, -1);
-                            console.log(notaMedia);
-                            Pelicula.findByIdAndUpdate(peliId, {nota_media: notaMedia}, { new: true }, (err, notaUpdate) => {
-                                if (err) {
-                                    return res.status(500).send({
-                                        message: "Error al guardar la nota media"
-                                    });
-                                } else {
-                                    return res.status(200).send({
-                                        message: "Guardado"
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
+                usuario.peliculas.push({
+                    titulo: pelicula.titulo, imagen: pelicula.imagen,
+                    nota: params.nota, pelicula: peliId
+                });
+                pelicula.save();
+                usuario.save();
+                notaMedia = notaPelicula(pelicula);
+                notaMedia = redondeo(notaMedia, -1);
+                console.log(notaMedia);
+                Pelicula.findByIdAndUpdate(peliId, { nota_media: notaMedia }, { new: true }, (err, notaUpdate) => {
+                    if (err) {
+                        return res.status(500).send({
+                            message: "Error al guardar la nota media"
+                        });
+                    } else {
+                        return res.status(200).send({
+                            message: "Guardado"
+                        });
+                    }
+                });
             }
         });
     },
@@ -270,7 +236,7 @@ const controller = {
     updateCritica: function (req, res) {
         const params = req.body;
         const peliId = params.peliculaId;
-        const usuarioId = params.usuarioId;
+        const usuarioId = params.usuario;
         const fecha = new Date();
         let notaMedia = 0;
         let status = false;
@@ -280,64 +246,51 @@ const controller = {
                 message: "No tienes permisos para escribir una crítica"
             });
         }
-        console.log('primero')
+        console.log('primero');
         Pelicula.findById(peliId, (err, pelicula) => {
             if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
                 });
-            } else if(!pelicula){
+            } else if (!pelicula) {
                 return res.status(404).send({
                     message: "Esta película no se encuentra en la plataforma"
                 });
             } else {
                 for (let i = 0; i < pelicula.criticas.length; i++) {
                     if (pelicula.criticas[i].usuario == usuarioId) {
-                        if (pelicula.criticas[i].texto != null) {
-                            status = true;
-                            break;
-                        }
+                        status = true;
+                        break;
                     }
                 }
                 if (!status) {
                     return res.status(404).send({
                         message: "Este usuario no ha escrito una crítica en esta película"
                     });
-                } 
+                }
                 console.log('cont');
                 Usuario.findById(usuarioId, (err, usuario) => {
                     if (err) {
                         return res.status(500).send({
                             message: "Error al mostrar los datos"
                         });
-                    } else if(!usuario){
+                    } else if (!usuario) {
                         return res.status(404).send({
                             message: "Este usuario no se encuentra en la plataforma "
                         });
                     } else {
                         for (let i = 0; i < pelicula.criticas.length; i++) {
                             if (pelicula.criticas[i].usuario == usuarioId) {
-                                if (pelicula.criticas[i].texto != null) {
-                                    pelicula.criticas.set(i, {
-                                        nota: params.nota, nick: usuario.nick, titulo: params.titulo,
-                                        texto: params.texto, fecha: fecha, usuario: usuarioId
-                                    });
-                                    break;
-                                }
-                            }
-                        }
-                        /*pelicula.criticas.forEach((element, index) => {
-                            console.log(element.titulo);
-                            if (element.usuario == usuarioId) {
-                                pelicula.criticas.set(index, {
+                                pelicula.criticas.set(i, {
                                     nota: params.nota, nick: usuario.nick, titulo: params.titulo,
                                     texto: params.texto, fecha: fecha, usuario: usuarioId
                                 });
+                                break;
                             }
-                        });*/
+                        }
 
-                        for(let i=0; i<usuario.peliculas.length; i++){
-                            if(usuario.peliculas[i].pelicula == peliId){
+                        for (let i = 0; i < usuario.peliculas.length; i++) {
+                            if (usuario.peliculas[i].pelicula == peliId) {
                                 usuario.peliculas.set(i, {
                                     titulo: pelicula.titulo, imagen: pelicula.imagen,
                                     nota: params.nota, pelicula: peliId
@@ -345,21 +298,13 @@ const controller = {
                                 break;
                             }
                         }
-                        /*usuario.peliculas.forEach((element, index) => {
-                            if (element.pelicula == peliId) {
-                                usuario.peliculas.set(index, {
-                                    titulo: pelicula.titulo, imagen: pelicula.imagen,
-                                    nota: params.nota, pelicula: peliId
-                                });
-                            }
-                        });*/
                         console.log('-------');
                         pelicula.save();
                         usuario.save();
                         notaMedia = notaPelicula(pelicula);
                         notaMedia = redondeo(notaMedia, -1);
                         console.log(notaMedia);
-                        Pelicula.findByIdAndUpdate(peliId, {nota_media: notaMedia}, { new: true }, (err, notaUpdate) => {
+                        Pelicula.findByIdAndUpdate(peliId, { nota_media: notaMedia }, { new: true }, (err, notaUpdate) => {
                             if (err) {
                                 return res.status(500).send({
                                     message: "Error al guardar la nota media"
@@ -370,7 +315,6 @@ const controller = {
                                 });
                             }
                         });
-
                     }
                 });
             }
@@ -477,6 +421,228 @@ const controller = {
                         });
                     }
                 });
+            }
+        });
+    },
+
+    //Guardar la nota que pone el usuario a una serie
+    saveNota: function (params, pelicula, res) {
+        const usuarioId = params.usuario;
+        const peliId = params.peliculaId;
+        const fecha = new Date();
+        let notaMedia = 0;
+
+        Usuario.findById(usuarioId, (err, usuario) => {
+            if (err) {
+                console.log("cosas");
+                return res.status(500).send({
+                    message: "Error usuario"
+                });
+            } else if (!usuario) {
+                return res.status(404).send({
+                    message: "Este usuario no se encuentra en la plataforma"
+                });
+            } else {
+                //Se añade la nota que ha puesto el usuario con sus datos
+                pelicula.criticas.push({
+                    nota: params.nota, nick: usuario.nick, fecha: fecha, usuario: usuarioId
+                });
+
+                //Se añade los datos de la serie y la nota del usuario
+                usuario.peliculas.push({
+                    titulo: pelicula.titulo, imagen: pelicula.imagen,
+                    nota: params.nota, pelicula: peliId
+                });
+
+                pelicula.save();
+                usuario.save();
+                notaMedia = notaPelicula(pelicula);
+                notaMedia = redondeo(notaMedia, -1);
+                let notaUp = {
+                    $set: {
+                        nota_media: notaMedia
+                    }
+                };
+                //Se actualiza la nota media de la serie
+                Pelicula.findByIdAndUpdate(peliId, notaUp, { new: true }, (err, notaUpdate) => {
+                    if (err) {
+                        return res.status(500).send({
+                            message: "Error al guardar la nota media"
+                        });
+                    } else {
+                        return res.status(200).send({
+                            message: "Guardado"
+                        });
+                    }
+                });
+            }
+        });
+    },
+
+    //Actualizar la nota que pone el usuario a una serie 
+    updateNota: function (params, pelicula, res) {
+        const usuarioId = params.usuario;
+        const fecha = new Date();
+        const peliId = params.peliculaId;
+        let notaMedia = 0;
+
+        Usuario.findById(usuarioId, (err, usuario) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            } else if (!usuario) {
+                return res.status(404).send({
+                    message: "Este usuario no se encuentra en la plataforma"
+                });
+            } else {
+                for (let i = 0; i < pelicula.criticas.length; i++) {
+                    if (pelicula.criticas[i].usuario == usuarioId) {
+                        if (pelicula.criticas[i].texto != null) {
+                            pelicula.criticas.set(i, {
+                                nota: params.nota, nick: usuario.nick, titulo: pelicula.criticas[i].titulo,
+                                texto: pelicula.criticas[i].texto, fecha: fecha, usuario: usuarioId
+                            });
+                        }
+                        else {
+                            pelicula.criticas.set(i, {
+                                nota: params.nota, nick: usuario.nick, fecha: fecha, usuario: usuarioId
+                            });
+                        }
+                        break;
+                    }
+                }
+
+                for (let i = 0; i < usuario.peliculas.length; i++) {
+                    if (usuario.peliculas[i].pelicula == peliId) {
+                        usuario.peliculas.set(i, {
+                            titulo: pelicula.titulo, imagen: pelicula.imagen,
+                            nota: params.nota, pelicula: peliId
+                        });
+                        break;
+                    }
+                }
+
+                console.log('-------');
+                pelicula.save();
+                usuario.save();
+                notaMedia = notaPelicula(pelicula);
+                notaMedia = redondeo(notaMedia, -1);
+                console.log(notaMedia);
+                let notaUp = {
+                    $set: {
+                        nota_media: notaMedia
+                    }
+                };
+                Pelicula.findByIdAndUpdate(peliId, notaUp, { new: true }, (err, notaUpdate) => {
+                    if (err) {
+                        return res.status(500).send({
+                            message: "Error al guardar la nota media"
+                        });
+                    } else {
+                        console.log('salta')
+                        return res.status(200).send({
+                            message: "Guardado"
+                        });
+                    }
+                });
+
+            }
+        });
+    },
+
+    // Función que se realizar antes de guardar una crítica para comprobar si el usuario ya ha puesto una nota o no
+    middlewareCritica: function (req, res) {
+        const params = req.body;
+        console.log(params);
+        const peliId = params.peliculaId;
+        const usuarioId = params.usuario;
+        console.log(usuarioId);
+        let status = 'new';
+
+        if (usuarioId != req.usuario.sub) {
+            console.log(req.usuario.sub);
+            return res.status(500).send({
+                message: "No tienes permisos para escribir una crítica"
+            });
+        }
+
+        Pelicula.findById(peliId, (err, pelicula) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error serie"
+                });
+            }
+            else if (!pelicula) {
+                return res.status(404).send({
+                    message: "Esta serie no se encuentra en la plataforma"
+                });
+            }
+            else {
+                for (let i = 0; i < pelicula.criticas.length; i++) {
+                    if (pelicula.criticas[i].usuario == usuarioId) {
+                        status = 'update';
+                        if (pelicula.criticas[i].texto != null) {
+                            status = 'false';
+                            break;
+                        }
+                        break;
+                    }
+                }
+            }
+            if (status == 'new') {
+                console.log('nueva');
+                controller.saveCritica(params, pelicula, res);
+            }
+            if (status == 'update') {
+                controller.updateCritica(req, res);
+            }
+            if (status == 'false') {
+                return res.status(404).send({
+                    message: "Este usuario ya tiene escrita una crítica"
+                });
+            }
+        });
+    },
+
+    // Función que se realiza antes de poner una nota para saber si el usuario ya ha escrito una crítica o no
+    middlewareNota: function (req, res) {
+        const params = req.body;
+        const usuarioId = params.usuario;
+        const peliId = params.peliculaId;
+        let status = 'new';
+
+        if (usuarioId != req.usuario.sub) {
+            console.log(req.usuario.sub);
+            return res.status(500).send({
+                message: "No tienes permisos para escribir una crítica"
+            });
+        }
+
+        Pelicula.findById(peliId, (err, pelicula) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error serie"
+                });
+            }
+            else if (!pelicula) {
+                return res.status(404).send({
+                    message: "Esta serie no se encuentra en la plataforma"
+                });
+            }
+            else {
+                for (let i = 0; i < pelicula.criticas.length; i++) {
+                    if (pelicula.criticas[i].usuario == usuarioId) {
+                        status = 'update';
+                        break;
+                    }
+                }
+            }
+            if (status == 'new') {
+                controller.saveNota(params, pelicula, res);
+            }
+            if (status == 'update') {
+                controller.updateNota(params, pelicula, res);
             }
         });
     }

@@ -371,6 +371,29 @@ const controller = {
                 res.sendFile(path.resolve(file));
             }
         })
+    }, 
+
+    recomendar: function(req, res) {
+        const usuarioId = req.params.usuario;
+        let criticas = [];
+        Usuario.findById(userId, (err, usuario) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            }
+            if (!usuario) {
+                return res.status(404).send({
+                    message: "No existe ningúna usuario con este identificador"
+                });
+            }
+            usuario.peliculas.forEach(element => {
+                criticas.push(element.id_model)
+            });
+            usuario.series.forEach(element => {
+                criticas.push(element.id_model)
+            });
+        });
     }
 }
 

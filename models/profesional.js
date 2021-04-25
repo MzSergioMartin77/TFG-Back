@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const ProfesionalSchema = new Schema({
-    id_profesional: Number,
+    id_TMDB: Number,
     nombre: String,
     biografia: String,
     imagen: String,

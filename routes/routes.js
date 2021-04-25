@@ -16,13 +16,14 @@ const router = express.Router();
 router.get('/pelicula/:id', peliController.getIdPeli);
 router.get('/pelicula/t/:titulo', peliController.getTituloPeli);
 router.get('/peliculas', peliController.getPeliculas);
-router.post('/peliCritica', md_aut.ensureAuth, peliController.saveCritica);
+router.post('/peliCritica', md_aut.ensureAuth, peliController.middlewareCritica);
 router.post('/peliComentario', md_aut.ensureAuth, peliController.saveComentario);
 router.put('/criticaPupdate', md_aut.ensureAuth, peliController.updateCritica);
 router.delete('/deletePcritica/:pelicula/:usuario', md_aut.ensureAuth, peliController.deleteCritica);
 router.get('/criticaPeli/:pelicula/:critica', peliController.getCritica);
 router.get('/buscarPeli/:titulo', peliController.getBuscarPeli);
 router.get('/criticaPeliUser/:pelicula/:usuario', peliController.getCriticaUser);
+router.post('/peliculaNota', md_aut.ensureAuth, peliController.middlewareNota);
 
 //Rutas para series
 router.get('/serie/:id', serieController.getIdSerie);

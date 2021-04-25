@@ -7,18 +7,21 @@ const peliculaSchema = new Schema({
     pelicula: {type: mongoose.Schema.Types.ObjectId, ref: 'pelicula'},
     titulo: String,
     imagen: String,
-    nota: Number
+    nota: Number,
+    id_model: Number
 });
 
 const serieSchema = new Schema({
     serie: {type: mongoose.Schema.Types.ObjectId, ref: 'serie'},
     titulo: String,
     imagen: String,
-    nota: Number
+    nota: Number,
+    id_model: Number
 });
 
 //esquema de los datos de los usuarios
 const UsuarioSchema = Schema({
+    id_model: Number,
     nombre: String,
     email: String,
     pass: String,

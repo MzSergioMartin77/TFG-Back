@@ -75,9 +75,9 @@ const controller = {
 
     getBuscarSerie: function (req, res) {
         const tituloparam = req.params.titulo;
-        let buscar = "(?i)"+tituloparam;
+        let buscar = "(?i)" + tituloparam;
 
-        Serie.find({ titulo: {$regex: buscar} }, (err, serie) => {
+        Serie.find({ titulo: { $regex: buscar } }, (err, serie) => {
             if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
@@ -115,7 +115,7 @@ const controller = {
     },
 
     //Buscar una crítica usando el id del usuario
-    getCriticaUser: function (req, res){
+    getCriticaUser: function (req, res) {
         const serieId = req.params.serie;
         const userId = req.params.usuario;
 
@@ -124,19 +124,19 @@ const controller = {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
                 });
-            } else if(!serie){
+            } else if (!serie) {
                 return res.status(404).send({
                     message: "No hay ninguna serie con este identificador en la base de datos"
                 });
             }
-            else{
-                for(let i=0; i<serie.criticas.length; i++){
-                    if(serie.criticas[i].usuario == userId){
-                        if(serie.criticas[i].texto != null){
+            else {
+                for (let i = 0; i < serie.criticas.length; i++) {
+                    if (serie.criticas[i].usuario == userId) {
+                        if (serie.criticas[i].texto != null) {
                             return res.status(200).send({
                                 critica: serie.criticas[i]
-                            }); 
-                        } else{
+                            });
+                        } else {
                             return res.status(200).send({
                                 message: "Nada"
                             });
@@ -145,14 +145,14 @@ const controller = {
                 }
                 return res.status(200).send({
                     message: "Nada"
-                }); 
+                });
             }
-            
+
         });
     },
 
     //Buscar una crítica de una serie
-    getCritica: function (req, res){
+    getCritica: function (req, res) {
         const serieId = req.params.serie;
         const criticaId = req.params.critica;
 
@@ -162,12 +162,12 @@ const controller = {
                     message: "Error al mostrar los datos"
                 });
             }
-            else if(!serie){
+            else if (!serie) {
                 return res.status(404).send({
                     message: "No hay ninguna serie con este identificador en la base de datos"
                 });
             }
-            else{
+            else {
                 const critica = serie.criticas.id(criticaId);
                 console.log(critica);
                 if (!critica) {
@@ -180,7 +180,7 @@ const controller = {
                     critica
                 });
             }
-            
+
         });
     },
 
@@ -195,61 +195,52 @@ const controller = {
         const fecha = new Date();
         let notaMedia = 0;
 
-        //Se busca la serie a la que se le pone la crítica
-        /*Serie.findById(serieId, (err, serie) => {
+        //Se busca al usuario que escribe la crítica
+        Usuario.findById(usuarioId, (err, usuario) => {
             if (err) {
+                console.log("cosas");
                 return res.status(500).send({
-                    message: "Error serie"
+                    message: "Error usuario"
                 });
-            } else if (!serie) {
+            } else if (!usuario) {
                 return res.status(404).send({
-                    message: "Esta serie no se encuentra en la plataforma"
+                    message: "Este usuario no se encuentra en la plataforma"
                 });
-            }else {*/
-                //Se busca al usuario que escribe la crítica
-                Usuario.findById(usuarioId, (err, usuario) => {
+            } else {
+                //Se añaden los datos de la crítica a la serie
+                serie.criticas.push({
+                    nota: params.nota, nick: usuario.nick, titulo: params.titulo,
+                    texto: params.texto, fecha: fecha, usuario: usuarioId
+                });
+
+                //Se añade los datos de la crítica al usuario
+                usuario.series.push({
+                    titulo: serie.titulo, imagen: serie.imagen,
+                    nota: params.nota, serie: serieId
+                });
+                serie.save();
+                usuario.save();
+                notaMedia = notaPelicula(serie);
+                notaMedia = redondeo(notaMedia, -1);
+                let notaUp = {
+                    $set: {
+                        nota_media: notaMedia
+                    }
+                };
+                //Se actualiza la nota media de la serie
+                Serie.findByIdAndUpdate(serieId, notaUp, { new: true }, (err, notaUpdate) => {
                     if (err) {
-                        console.log("cosas");
                         return res.status(500).send({
-                            message: "Error usuario"
+                            message: "Error al guardar la nota media"
                         });
                     } else {
-                        //Se añaden los datos de la crítica a la serie
-                        serie.criticas.push({
-                            nota: params.nota, nick: usuario.nick, titulo: params.titulo,
-                            texto: params.texto, fecha: fecha, usuario: usuarioId
-                        });
-
-                        //Se añade los datos de la crítica al usuario
-                        usuario.series.push({
-                            titulo: serie.titulo, imagen: serie.imagen,
-                            nota: params.nota, serie: serieId
-                        });
-                        serie.save();
-                        usuario.save();
-                        notaMedia = notaPelicula(serie);
-                        notaMedia = redondeo(notaMedia, -1);
-                        let notaUp = {
-                            $set: {
-                                nota_media: notaMedia
-                            }
-                        };
-                        //Se actualiza la nota media de la serie
-                        Serie.findByIdAndUpdate(serieId, notaUp, { new: true }, (err, notaUpdate) => {
-                            if (err) {
-                                return res.status(500).send({
-                                    message: "Error al guardar la nota media"
-                                });
-                            } else {
-                                return res.status(200).send({
-                                    message: "Guardado"
-                                });
-                            }
+                        return res.status(200).send({
+                            message: "Guardado"
                         });
                     }
                 });
-            //}
-        //});
+            }
+        });
     },
 
     //Actualizar la crítica 
@@ -262,6 +253,7 @@ const controller = {
         console.log(usuarioId);
         const fecha = new Date();
         let notaMedia = 0;
+        let status = false;
 
         if (usuarioId != req.usuario.sub) {
             return res.status(500).send({
@@ -274,32 +266,53 @@ const controller = {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
                 });
-            } else {
+            } else if (!serie) {
+                return res.status(404).send({
+                    message: "Esta película no se encuentra en la plataforma"
+                });
+            }
+            else {
+                for (let i = 0; i < serie.criticas.length; i++) {
+                    if (serie.criticas[i].usuario == usuarioId) {
+                        status = true;
+                        break;
+                    }
+                }
+                if (!status) {
+                    return res.status(404).send({
+                        message: "Este usuario no ha escrito una crítica en esta película"
+                    });
+                }
                 Usuario.findById(usuarioId, (err, usuario) => {
                     if (err) {
                         return res.status(500).send({
                             message: "Error al mostrar los datos"
                         });
+                    } else if (!usuario) {
+                        return res.status(404).send({
+                            message: "Este usuario no se encuentra en la plataforma "
+                        });
                     } else {
-                        serie.criticas.forEach((element, index) => {
-                            console.log(element.titulo);
-                            if (element.usuario == usuarioId) {
-                                serie.criticas.set(index, {
+                        for (let i = 0; i < serie.criticas.length; i++) {
+                            if (serie.criticas[i].usuario == usuarioId) {
+                                serie.criticas.set(i, {
                                     nota: params.nota, nick: usuario.nick, titulo: params.titulo,
                                     texto: params.texto, fecha: fecha, usuario: usuarioId
                                 });
+                                break;
                             }
-                        });
+                        }
 
-                        usuario.series.forEach((element, index) => {
-                            console.log('Criticas');
-                            if (element.serie == serieId) {
-                                usuario.series.set(index, {
+                        for (let i = 0; i < usuario.peliculas.length; i++) {
+                            if (usuario.series[i].serie == serieId) {
+                                usuario.series.set(i, {
                                     titulo: serie.titulo, imagen: serie.imagen,
                                     nota: params.nota, serie: serieId
                                 });
+                                break;
                             }
-                        });
+                        }
+
                         console.log('-------');
                         serie.save();
                         usuario.save();
@@ -392,7 +405,7 @@ const controller = {
     },
 
     //Guardar comentario
-    saveComentario: function(req, res){
+    saveComentario: function (req, res) {
         const params = req.body;
         console.log(params);
         const serieId = params.serieId;
@@ -400,19 +413,19 @@ const controller = {
         const fecha = new Date();
 
         Serie.findById(serieId, (err, serie) => {
-            if(err){
+            if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
                 });
-            }else {
+            } else {
                 Usuario.findById(usuarioId, (err, usuario) => {
-                    if(err){
+                    if (err) {
                         console.log("cosas");
                         return res.status(500).send({
                             message: "Error al mostrar los datos"
                         });
-                    }else {
-                        serie.comentarios.push({nick:usuario.nick, texto: params.texto, fecha: fecha, usuario: usuarioId});
+                    } else {
+                        serie.comentarios.push({ nick: usuario.nick, texto: params.texto, fecha: fecha, usuario: usuarioId });
                         serie.save();
                         return res.status(200).send({
                             message: "Guardado"
@@ -423,18 +436,20 @@ const controller = {
         });
     },
 
-    saveNota: function(params, serie, res) {
+    //Guardar la nota que pone el usuario a una serie
+    saveNota: function (params, serie, res) {
         const usuarioId = params.usuario;
+        const serieId = params.serieId;
         const fecha = new Date();
         let notaMedia = 0;
-        
+
         Usuario.findById(usuarioId, (err, usuario) => {
             if (err) {
                 console.log("cosas");
                 return res.status(500).send({
                     message: "Error usuario"
                 });
-            } else if(!usuario){
+            } else if (!usuario) {
                 return res.status(404).send({
                     message: "Este usuario no se encuentra en la plataforma"
                 });
@@ -475,7 +490,8 @@ const controller = {
         });
     },
 
-    updateNota: function(params, serie, res){
+    //Actualizar la nota que pone el usuario a una serie 
+    updateNota: function (params, serie, res) {
         const usuarioId = params.usuario;
         const fecha = new Date();
         const serieId = params.serieId;
@@ -486,36 +502,38 @@ const controller = {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
                 });
-            } else if(!usuario){
+            } else if (!usuario) {
                 return res.status(404).send({
                     message: "Este usuario no se encuentra en la plataforma"
                 });
             } else {
-                serie.criticas.forEach((element, index) => {
-                    console.log(element.titulo);
-                    if (element.usuario == usuarioId) {
-                        if(element.texto != null){
-                            serie.criticas.set(index, {
-                                nota: params.nota, nick: usuario.nick, titulo: element.titulo,
-                                texto: element.texto, fecha: fecha, usuario: usuarioId
+                for (let i = 0; i < serie.criticas.length; i++) {
+                    if (serie.criticas[i].usuario == usuarioId) {
+                        if (serie.criticas[i].texto != null) {
+                            serie.criticas.set(i, {
+                                nota: params.nota, nick: usuario.nick, titulo: serie.criticas[i].titulo,
+                                texto: serie.criticas[i].texto, fecha: fecha, usuario: usuarioId
                             });
-                        } else{
-                            serie.criticas.set(index, {
+                        }
+                        else {
+                            serie.criticas.set(i, {
                                 nota: params.nota, nick: usuario.nick, fecha: fecha, usuario: usuarioId
                             });
-                        }                
+                        }
+                        break;
                     }
-                });
+                }
 
-                usuario.series.forEach((element, index) => {
-                    console.log('Criticas');
-                    if (element.serie == serieId) {
-                        usuario.series.set(index, {
+                for (let i = 0; i < usuario.series.length; i++) {
+                    if (usuario.series[i].serie == serieId) {
+                        usuario.series.set(i, {
                             titulo: serie.titulo, imagen: serie.imagen,
                             nota: params.nota, serie: serieId
                         });
+                        break;
                     }
-                });
+                }
+
                 console.log('-------');
                 serie.save();
                 usuario.save();
@@ -543,7 +561,8 @@ const controller = {
         });
     },
 
-    middlewareCritica: function(req, res){
+    // Función que se realizar antes de guardar una crítica para comprobar si el usuario ya ha puesto una nota o no
+    middlewareCritica: function (req, res) {
         const params = req.body;
         console.log(params);
         const serieId = params.serieId;
@@ -563,13 +582,13 @@ const controller = {
                 return res.status(500).send({
                     message: "Error serie"
                 });
-            } 
+            }
             else if (!serie) {
                 return res.status(404).send({
                     message: "Esta serie no se encuentra en la plataforma"
                 });
             }
-            else{
+            else {
                 for (let i = 0; i < serie.criticas.length; i++) {
                     if (serie.criticas[i].usuario == usuarioId) {
                         status = 'update';
@@ -581,14 +600,13 @@ const controller = {
                     }
                 }
             }
-            if(status == 'new'){
+            if (status == 'new') {
                 controller.saveCritica(params, serie, res);
-                //this.saveCritica(params, serie, res);
             }
-            if(status == 'update'){
+            if (status == 'update') {
                 controller.updateCritica(req, res);
             }
-            if(status == 'false'){
+            if (status == 'false') {
                 return res.status(404).send({
                     message: "Este usuario ya tiene escrita una crítica"
                 });
@@ -596,12 +614,13 @@ const controller = {
         });
     },
 
-    middlewareNota: function(req, res) {
+    // Función que se realiza antes de poner una nota para saber si el usuario ya ha escrito una crítica o no
+    middlewareNota: function (req, res) {
         const params = req.body;
         const usuarioId = params.usuario;
         const serieId = params.serieId;
         let status = 'new';
-         
+
         if (usuarioId != req.usuario.sub) {
             console.log(req.usuario.sub);
             return res.status(500).send({
@@ -614,13 +633,13 @@ const controller = {
                 return res.status(500).send({
                     message: "Error serie"
                 });
-            } 
+            }
             else if (!serie) {
                 return res.status(404).send({
                     message: "Esta serie no se encuentra en la plataforma"
                 });
             }
-            else{
+            else {
                 for (let i = 0; i < serie.criticas.length; i++) {
                     if (serie.criticas[i].usuario == usuarioId) {
                         status = 'update';
@@ -628,11 +647,12 @@ const controller = {
                     }
                 }
             }
-            if(status == 'new'){
+            if (status == 'new') {
+                console.log('nueva')
                 controller.saveNota(params, serie, res);
                 //this.saveCritica(params, serie, res);
             }
-            if(status == 'update'){
+            if (status == 'update') {
                 controller.updateNota(params, serie, res);
             }
         });
