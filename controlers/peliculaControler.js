@@ -206,12 +206,12 @@ const controller = {
                 console.log('entra');
                 pelicula.criticas.push({
                     nota: params.nota, nick: usuario.nick, titulo: params.titulo,
-                    texto: params.texto, fecha: fecha, usuario: usuarioId
+                    texto: params.texto, fecha: fecha, usuario_model: usuario.id_model, usuario: usuarioId
                 });
 
                 usuario.peliculas.push({
                     titulo: pelicula.titulo, imagen: pelicula.imagen,
-                    nota: params.nota, pelicula: peliId
+                    nota: params.nota, id_model: pelicula.id_model, pelicula: peliId
                 });
                 pelicula.save();
                 usuario.save();
@@ -283,7 +283,7 @@ const controller = {
                             if (pelicula.criticas[i].usuario == usuarioId) {
                                 pelicula.criticas.set(i, {
                                     nota: params.nota, nick: usuario.nick, titulo: params.titulo,
-                                    texto: params.texto, fecha: fecha, usuario: usuarioId
+                                    texto: params.texto, fecha: fecha,usuario_model: usuario.id_model, usuario: usuarioId
                                 });
                                 break;
                             }
@@ -293,7 +293,7 @@ const controller = {
                             if (usuario.peliculas[i].pelicula == peliId) {
                                 usuario.peliculas.set(i, {
                                     titulo: pelicula.titulo, imagen: pelicula.imagen,
-                                    nota: params.nota, pelicula: peliId
+                                    nota: params.nota, id_model: pelicula.id_model, pelicula: peliId
                                 });
                                 break;
                             }
@@ -445,13 +445,14 @@ const controller = {
             } else {
                 //Se añade la nota que ha puesto el usuario con sus datos
                 pelicula.criticas.push({
-                    nota: params.nota, nick: usuario.nick, fecha: fecha, usuario: usuarioId
+                    nota: params.nota, nick: usuario.nick, fecha: fecha,
+                    usuario_model: usuario.id_model, usuario: usuarioId
                 });
 
                 //Se añade los datos de la serie y la nota del usuario
                 usuario.peliculas.push({
                     titulo: pelicula.titulo, imagen: pelicula.imagen,
-                    nota: params.nota, pelicula: peliId
+                    nota: params.nota, id_model: pelicula.id_model, pelicula: peliId
                 });
 
                 pelicula.save();
@@ -501,12 +502,13 @@ const controller = {
                         if (pelicula.criticas[i].texto != null) {
                             pelicula.criticas.set(i, {
                                 nota: params.nota, nick: usuario.nick, titulo: pelicula.criticas[i].titulo,
-                                texto: pelicula.criticas[i].texto, fecha: fecha, usuario: usuarioId
+                                texto: pelicula.criticas[i].texto, fecha: fecha, usuario_model: usuario.id_model, usuario: usuarioId
                             });
                         }
                         else {
                             pelicula.criticas.set(i, {
-                                nota: params.nota, nick: usuario.nick, fecha: fecha, usuario: usuarioId
+                                nota: params.nota, nick: usuario.nick, fecha: fecha,
+                                usuario_model: usuario.id_model, usuario: usuarioId
                             });
                         }
                         break;
@@ -517,7 +519,7 @@ const controller = {
                     if (usuario.peliculas[i].pelicula == peliId) {
                         usuario.peliculas.set(i, {
                             titulo: pelicula.titulo, imagen: pelicula.imagen,
-                            nota: params.nota, pelicula: peliId
+                            nota: params.nota,  id_model: pelicula.id_model, pelicula: peliId
                         });
                         break;
                     }

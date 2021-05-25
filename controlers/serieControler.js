@@ -210,17 +210,17 @@ const controller = {
                 //Se añaden los datos de la crítica a la serie
                 serie.criticas.push({
                     nota: params.nota, nick: usuario.nick, titulo: params.titulo,
-                    texto: params.texto, fecha: fecha, usuario: usuarioId
+                    texto: params.texto, fecha: fecha, usuario_model: usuario.id_model, usuario: usuarioId
                 });
 
                 //Se añade los datos de la crítica al usuario
                 usuario.series.push({
                     titulo: serie.titulo, imagen: serie.imagen,
-                    nota: params.nota, serie: serieId
+                    nota: params.nota, id_model: serie.id_model, serie: serieId
                 });
                 serie.save();
                 usuario.save();
-                notaMedia = notaPelicula(serie);
+                notaMedia = notaSerie(serie);
                 notaMedia = redondeo(notaMedia, -1);
                 let notaUp = {
                     $set: {
@@ -297,7 +297,7 @@ const controller = {
                             if (serie.criticas[i].usuario == usuarioId) {
                                 serie.criticas.set(i, {
                                     nota: params.nota, nick: usuario.nick, titulo: params.titulo,
-                                    texto: params.texto, fecha: fecha, usuario: usuarioId
+                                    texto: params.texto, fecha: fecha, usuario_model: usuario.id_model, usuario: usuarioId
                                 });
                                 break;
                             }
@@ -307,7 +307,7 @@ const controller = {
                             if (usuario.series[i].serie == serieId) {
                                 usuario.series.set(i, {
                                     titulo: serie.titulo, imagen: serie.imagen,
-                                    nota: params.nota, serie: serieId
+                                    nota: params.nota, id_model: serie.id_model, serie: serieId
                                 });
                                 break;
                             }
@@ -456,13 +456,14 @@ const controller = {
             } else {
                 //Se añade la nota que ha puesto el usuario con sus datos
                 serie.criticas.push({
-                    nota: params.nota, nick: usuario.nick, fecha: fecha, usuario: usuarioId
+                    nota: params.nota, nick: usuario.nick, fecha: fecha, 
+                    usuario_model: usuario.id_model, usuario: usuarioId
                 });
 
                 //Se añade los datos de la serie y la nota del usuario
                 usuario.series.push({
                     titulo: serie.titulo, imagen: serie.imagen,
-                    nota: params.nota, serie: serieId
+                    nota: params.nota, id_model: serie.id_model, serie: serieId
                 });
 
                 serie.save();
@@ -512,12 +513,13 @@ const controller = {
                         if (serie.criticas[i].texto != null) {
                             serie.criticas.set(i, {
                                 nota: params.nota, nick: usuario.nick, titulo: serie.criticas[i].titulo,
-                                texto: serie.criticas[i].texto, fecha: fecha, usuario: usuarioId
+                                texto: serie.criticas[i].texto, fecha: fecha, usuario_model: usuario.id_model, usuario: usuarioId
                             });
                         }
                         else {
                             serie.criticas.set(i, {
-                                nota: params.nota, nick: usuario.nick, fecha: fecha, usuario: usuarioId
+                                nota: params.nota, nick: usuario.nick, fecha: fecha, 
+                                usuario_model: usuario.id_model, usuario: usuarioId
                             });
                         }
                         break;
@@ -528,7 +530,7 @@ const controller = {
                     if (usuario.series[i].serie == serieId) {
                         usuario.series.set(i, {
                             titulo: serie.titulo, imagen: serie.imagen,
-                            nota: params.nota, serie: serieId
+                            nota: params.nota, id_model: serie.id_model, serie: serieId
                         });
                         break;
                     }

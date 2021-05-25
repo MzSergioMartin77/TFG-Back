@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/MzSergioMartin77/TFG-Back#readme",
   "dependencies": {
+    "@tensorflow/tfjs-node": "^3.5.0",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "connect-multiparty": "^2.2.0",

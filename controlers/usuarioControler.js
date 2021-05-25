@@ -1,6 +1,9 @@
 'use strict'
 
 const Usuario = require('../models/usuario');
+const Serie = require('../models/serie');
+const Pelicula = require('../models/pelicula');
+const modelo = require('../model_tf/modelo');
 const mongoose = require('mongoose');
 mongoose.set('useFindAndModify', false);
 mongoose.set('useUnifiedTopology', true);
@@ -9,6 +12,78 @@ const rondas = 10;
 const jwt = require('../services/jwt');
 const fs = require('fs');
 const path = require('path');
+
+function criticasUser(usuario, criticas) {
+    console.log('las criticas')
+    console.log(usuario._id)
+
+    return new Promise((resolve) => {
+        console.log('promesa')
+        usuario.peliculas.forEach(element => {
+            criticas.push(element.id_model)
+        });
+        usuario.series.forEach(element => {
+            criticas.push(element.id_model)
+        });
+
+        resolve(criticas);
+    })
+}
+
+function buscarRecom(recom, recomendaciones, res) {
+    console.log('primero')
+    //console.log(recom)
+    let x = 0;
+    for (let i in recom) {
+        //console.log(recom[i].id_model)
+        Pelicula.find({ id_model: recom[i].id_model }, (err, peli) => {
+            if (err) {
+                console.log('Se ha producido un error')
+            }
+            if (peli != '') {
+                console.log(peli[0].titulo)
+                recomendaciones.push({ id: peli[0]._id, titulo: peli[0].titulo, imagen: peli[0].imagen, tipo: 'pelicula' });
+            }
+        })
+        Serie.find({ id_model: recom[i].id_model }, (err, serie) => {
+            if (err) {
+                console.log('Se ha producido un error')
+            }
+            if (serie != '') {
+                console.log(serie[0].titulo)
+                recomendaciones.push({ id: serie[0]._id, titulo: serie[0].titulo, imagen: serie[0].imagen, tipo: 'serie' });
+            }
+            x += 1;
+            console.log(x);
+            if (x == recom.length) {
+                return res.status(200).send({
+                    recomendaciones
+                })
+            }
+        })
+
+    }
+    /*for (let j = 0; j < recom.length; j++) {
+        Serie.find({ id_model: recom[j].id_model }, (err, serie) => {
+            if (err) {
+                console.log('Se ha producido un error')
+            }
+            if (serie != '') {
+                //console.log(serie)
+                recomendaciones.push({ id: serie[0]._id, titulo: serie[0].titulo, imagen: serie[0].imagen, tipo: 'serie' });
+            }
+        })
+    }*/
+
+}
+
+function lanzadera(usuario, criticas, recomendaciones) {
+    criticasUser(usuario, criticas).then(() => {
+        modelo.recommend(usuario.id_model, criticas).then((recom) => {
+            buscarRecom(recom, recomendaciones)
+        })
+    })
+}
 
 const controller = {
 
@@ -21,6 +96,9 @@ const controller = {
         const usuario = new Usuario();
 
         if (params.nombre && params.nick && params.email && params.pass) {
+            Usuario.countDocuments({}, (err, count) => {
+                usuario.id_model = count + 1;
+            });
             usuario.nombre = params.nombre;
             usuario.nick = params.nick;
             usuario.email = params.email;
@@ -40,13 +118,13 @@ const controller = {
                         if (usuarios && usuarios.length >= 1) {
                             return res.status(200).send({ message: 'Nick-Error' });
                         }
-                        else{
+                        else {
                             /* Se utiliza la libreria bcrypt para realizar un hash sobre la contraseña
                             y la variable rondas inidca el número de hashes que se realizan en ella en 
                             este caso realizamos 10 para que sea más seguro */
                             bcrypt.hash(params.pass, rondas, (err, hash) => {
                                 usuario.pass = hash;
-        
+
                                 usuario.save((err, usuarioS) => {
                                     if (err) {
                                         return res.status(500).send({ message: 'Error al guardar el usuario' });
@@ -110,11 +188,11 @@ const controller = {
 
     },
 
-    getNickUsuario: function(req, res){
+    getNickUsuario: function (req, res) {
         const nickParam = req.params.nick;
-        let buscar = "(?i)"+nickParam;
+        let buscar = "(?i)" + nickParam;
 
-        Usuario.find({ nick: {$regex: buscar} }, (err, usuario) => {
+        Usuario.find({ nick: { $regex: buscar } }, (err, usuario) => {
             if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
@@ -180,11 +258,11 @@ const controller = {
         });
     },
 
-    seguirUsuario: function (req, res){
+    seguirUsuario: function (req, res) {
         const identificadoId = req.params.identificado;
         const usuarioId = req.params.usuario;
         let status = true;
-        
+
         Usuario.findById(identificadoId, (err, identificado) => {
             if (err) {
                 return res.status(500).send({
@@ -195,7 +273,7 @@ const controller = {
                 return res.status(404).send({
                     message: "No existe ningúna usuario con este identificador"
                 });
-            }else{
+            } else {
                 Usuario.findById(usuarioId, (err, usuario) => {
                     if (err) {
                         return res.status(500).send({
@@ -206,16 +284,16 @@ const controller = {
                         return res.status(404).send({
                             message: "No existe ningúna usuario con este identificador"
                         });
-                    }else{
+                    } else {
                         console.log(identificado.seguidos.length);
-                        for(let i=0; i<identificado.seguidos.length; i++){
-                            if(identificado.seguidos[i].usuario == usuarioId){
+                        for (let i = 0; i < identificado.seguidos.length; i++) {
+                            if (identificado.seguidos[i].usuario == usuarioId) {
                                 console.log('Ya esta');
                                 status = false;
                                 break;
                             }
                         }
-                        if(status){
+                        if (status) {
                             identificado.seguidos.push({
                                 nick: usuario.nick, usuario: usuarioId
                             });
@@ -228,19 +306,19 @@ const controller = {
                             return res.status(200).send({
                                 message: "Guardado"
                             });
-                        }else{
+                        } else {
                             return res.status(404).send({
                                 message: "Ya sigue ha este usuario"
                             });
                         }
-                    }  
+                    }
                 });
             }
-            
+
         });
     },
 
-    dejarSeguir: function (req, res){
+    dejarSeguir: function (req, res) {
         const identificadoId = req.params.identificado;
         const usuarioId = req.params.usuario;
         let status1 = false;
@@ -256,7 +334,7 @@ const controller = {
                 return res.status(404).send({
                     message: "No existe ningúna usuario con este identificador"
                 });
-            }else{
+            } else {
                 Usuario.findById(usuarioId, (err, usuario) => {
                     if (err) {
                         return res.status(500).send({
@@ -267,44 +345,44 @@ const controller = {
                         return res.status(404).send({
                             message: "No existe ningúna usuario con este identificador"
                         });
-                    }else{
+                    } else {
                         console.log(identificado.seguidos.length);
-                        for(let i=0; i<identificado.seguidos.length; i++){
-                            if(identificado.seguidos[i].usuario == usuarioId){
+                        for (let i = 0; i < identificado.seguidos.length; i++) {
+                            if (identificado.seguidos[i].usuario == usuarioId) {
                                 status1 = true;
-                                identificado.seguidos[i].remove();                               
+                                identificado.seguidos[i].remove();
                                 break;
                             }
                         }
-                        for(let i=0; i<usuario.seguidores.length; i++){
-                            if(usuario.seguidores[i].usuario == identificadoId){
+                        for (let i = 0; i < usuario.seguidores.length; i++) {
+                            if (usuario.seguidores[i].usuario == identificadoId) {
                                 status2 = true;
                                 usuario.seguidores[i].remove();
                                 break;
                             }
                         }
-                        if(status1 && status2){
+                        if (status1 && status2) {
                             identificado.save();
                             usuario.save();
                             return res.status(200).send({
                                 message: "Guardado"
                             });
-                        }else{
+                        } else {
                             return res.status(404).send({
                                 message: "Algo ha fallado"
                             });
                         }
-                    }  
+                    }
                 });
             }
-            
+
         });
     },
 
-    uploadImagen: function(req, res) {
+    uploadImagen: function (req, res) {
         const userId = req.params.usuario;
 
-        if(req.files){
+        if (req.files) {
             let file_path = req.files.imagen.path;
             let file_split = file_path.split('\\');
             console.log(file_split);
@@ -324,9 +402,9 @@ const controller = {
                 });
             }
 
-            if(file_ext === 'jpg' || file_ext === 'JPG' || file_ext === 'png' || file_ext === 'PNG'
-             || file_ext === 'jpeg' || file_ext === 'JPEG' || file_ext === 'gif' || file_ext === 'GIF'){
-                return Usuario.findByIdAndUpdate(userId, { imagen: file_name }, {new: true}, (err, userUpdate) => {
+            if (file_ext === 'jpg' || file_ext === 'JPG' || file_ext === 'png' || file_ext === 'PNG'
+                || file_ext === 'jpeg' || file_ext === 'JPEG' || file_ext === 'gif' || file_ext === 'GIF') {
+                return Usuario.findByIdAndUpdate(userId, { imagen: file_name }, { new: true }, (err, userUpdate) => {
                     if (err) {
                         return res.status(500).send({
                             message: "Error al actualizar los datos"
@@ -347,53 +425,111 @@ const controller = {
                     return res.status(200).send({
                         message: "La extensión no es válida"
                     });
-                }); 
-                           
+                });
+
             }
         }
         else {
             return res.status(200).send({
                 message: "No se ha subido ningúna imagen"
-            }); 
+            });
         }
     },
 
     getImagen: function (req, res) {
         const imagen_file = req.params.imagen;
-        const file = './imagen/usuario/'+imagen_file;
+        const file = './imagen/usuario/' + imagen_file;
 
         fs.access(file, (err) => {
             console.log(file);
-            if(err){
+            if (err) {
                 console.log('entra');
-                res.status(200).send({message: 'No existe la imagen'});
-            } else{
+                res.status(200).send({ message: 'No existe la imagen' });
+            } else {
                 res.sendFile(path.resolve(file));
             }
         })
-    }, 
+    },
 
-    recomendar: function(req, res) {
-        const usuarioId = req.params.usuario;
+    recomendar: async function (req, res) {
+        const userId = req.params.id;
         let criticas = [];
+        let recomendaciones = [{ id: String, titulo: String, imagen: String, tipo: String }];
+
+        if (userId != req.usuario.sub) {
+            return res.status(403).send({
+                message: "No tienes permisos"
+            });
+        }
+
         Usuario.findById(userId, (err, usuario) => {
             if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
                 });
             }
-            if (!usuario) {
+            else if (!usuario) {
                 return res.status(404).send({
                     message: "No existe ningúna usuario con este identificador"
                 });
+            } else {
+
+                criticasUser(usuario, criticas).then(() => {
+                    modelo.recommend(usuario.id_model, criticas).then((recom) => {
+                        buscarRecom(recom, recomendaciones, res)
+                        /*for (let i in recom) {
+                            console.log(recom[i].id_model)
+                            Pelicula.find({ id_model: recom[i].id_model }, (err, peli) => {
+                                if (err) {
+                                    console.log('Se ha producido un error')
+                                }
+                                if (peli != '') {
+                                    console.log(peli[0].titulo)
+                                    recomendaciones.push({ id: peli[0]._id, titulo: peli[0].titulo, imagen: peli[0].imagen, tipo: 'pelicula' });
+                                }
+                            })
+                            Serie.find({ id_model: recom[i].id_model }, (err, serie) => {
+                                if (err) {
+                                    console.log('Se ha producido un error')
+                                }
+                                if (serie != '') {
+                                    //console.log(serie)
+                                    recomendaciones.push({ id: serie[0]._id, titulo: serie[0].titulo, imagen: serie[0].imagen, tipo: 'serie' });
+                                }
+                            })
+                        }*/
+
+                    })
+                })
+
+
+
+                /*criticasUser(usuario, criticas).then(() => {
+                    let recom = await modelo.recommend(usuario.id_model, criticas)
+                    buscarRecom(recom, recomendaciones).then(() => {
+                        console.log('entra')
+                        return res.status(200).send({
+                            recomendaciones
+                        })
+                    })
+                }) */
+
             }
-            usuario.peliculas.forEach(element => {
-                criticas.push(element.id_model)
-            });
-            usuario.series.forEach(element => {
-                criticas.push(element.id_model)
-            });
-        });
+
+        })
+
+        /*recom.forEach(element => {
+            Serie.find({id_model: element.id_model}, (err, serie) => {
+                if(serie){
+                    recomendaciones.push({id: serie._id, titulo: serie.titulo, imagen: serie.imagen, tipo: 'serie'});
+                }
+            })
+            Pelicula.find({id_model: element.id_model}, (err, peli) => {
+                if(peli){
+                    recomendaciones.push({id: peli._id, titulo: peli.titulo, imagen: peli.imagen, tipo: 'pelicula'});
+                }
+            })
+        })*/
     }
 }
 

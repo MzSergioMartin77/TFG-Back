@@ -10,6 +10,7 @@ const CriticaSchema = new Schema({
     titulo: String,
     texto: String,
     fecha: Date,
+    usuario_model: Number,
     usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'}
 });
 
@@ -24,6 +25,7 @@ const ComentarioSchema = new Schema({
 
 //esquema de los datos de las películas
 const SerieSchema = new Schema({
+    _id: mongoose.Schema.Types.ObjectId,
     id_model: Number,
     id_TMDB: Number,
     titulo: String,
@@ -36,6 +38,8 @@ const SerieSchema = new Schema({
     capitulos: Number,
     inicio: Date,
     final: Date,
+    trailer_es: String,
+    trailer_en: String,
     actores: [{
         nombre: String,
         personaje: String
