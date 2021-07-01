@@ -18,6 +18,7 @@ router.get('/pelicula/t/:titulo', peliController.getTituloPeli);
 router.get('/peliculas', peliController.getPeliculas);
 router.post('/peliCritica', md_aut.ensureAuth, peliController.middlewareCritica);
 router.post('/peliComentario', md_aut.ensureAuth, peliController.saveComentario);
+router.delete('/deletePcomentario', md_aut.ensureAuth, peliController.deleteComentario);
 router.put('/criticaPupdate', md_aut.ensureAuth, peliController.updateCritica);
 router.delete('/deletePcritica/:pelicula/:usuario', md_aut.ensureAuth, peliController.deleteCritica);
 router.get('/criticaPeli/:pelicula/:critica', peliController.getCritica);

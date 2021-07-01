@@ -51,9 +51,12 @@ const controller = {
 
     getBuscarPro: function(req, res){
         const nombreparam = req.params.nombre;
-        let buscar = "(?i)"+nombreparam;
+        let buscar = "(?i)^"+nombreparam;
 
-        Profesional.find({ nombre: {$regex: buscar} }, (err, profesional) => {
+        Profesional.find({ $or: [
+            {$text: {$search: nombreparam, $diacriticSensitive: false}},
+            {nombre: {$regex: buscar}}
+        ]}, (err, profesional) => {
             if(err){
                 return res.status(500).send({
                     message: "Error al mostrar los datos"

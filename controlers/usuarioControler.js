@@ -77,14 +77,6 @@ function buscarRecom(recom, recomendaciones, res) {
 
 }
 
-function lanzadera(usuario, criticas, recomendaciones) {
-    criticasUser(usuario, criticas).then(() => {
-        modelo.recommend(usuario.id_model, criticas).then((recom) => {
-            buscarRecom(recom, recomendaciones)
-        })
-    })
-}
-
 const controller = {
 
     pruebas: function (req, res) {
@@ -189,10 +181,13 @@ const controller = {
     },
 
     getNickUsuario: function (req, res) {
-        const nickParam = req.params.nick;
-        let buscar = "(?i)" + nickParam;
-
-        Usuario.find({ nick: { $regex: buscar } }, (err, usuario) => {
+        const nickparam = req.params.nick;
+        let buscar = "(?i)^" + nickparam;
+        //Usuario.find({ nick: { $regex: buscar } }, (err, usuario)
+        Usuario.find({ $or: [
+            {$text: {$search: nickparam, $diacriticSensitive: false} },
+            {nick: {$regex: buscar}}
+        ]}, (err, usuario) => {
             if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"

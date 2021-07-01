@@ -75,9 +75,12 @@ const controller = {
 
     getBuscarSerie: function (req, res) {
         const tituloparam = req.params.titulo;
-        let buscar = "(?i)" + tituloparam;
+        let buscar = "(?i)^" + tituloparam;
 
-        Serie.find({ titulo: { $regex: buscar } }, (err, serie) => {
+        Serie.find({ $or: [
+            {$text: {$search: tituloparam, $diacriticSensitive: false}},
+            {titulo: {$regex: buscar}}
+        ] }, (err, serie) => {
             if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"

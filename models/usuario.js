@@ -36,8 +36,6 @@ const UsuarioSchema = Schema({
         nick: String, 
         usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'}
     }],
-    comentariosPeli: [{type: mongoose.Schema.Types.ObjectId, ref: 'pelicula'}],
-    comentariosSerie: [{type: mongoose.Schema.Types.ObjectId, ref: 'serie'}],
     peliculas: [peliculaSchema],
     series: [serieSchema]
 });

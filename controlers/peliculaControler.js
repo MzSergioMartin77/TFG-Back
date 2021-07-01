@@ -78,10 +78,13 @@ const controller = {
     },
 
     getBuscarPeli: function (req, res) {
-        const tituloparam = req.params.titulo;
-        let buscar = "(?i)" + tituloparam;
+        const tituloparam = req.params.titulo;     
+        let buscar = "(?i)^" + tituloparam;
 
-        Pelicula.find({ titulo: { $regex: buscar } }, (err, pelicula) => {
+        Pelicula.find({ $or: [
+            {$text: {$search: tituloparam, $diacriticSensitive: false}},
+            { titulo: {$regex: buscar}}
+        ]}, (err, pelicula) => {
             if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
@@ -425,7 +428,112 @@ const controller = {
         });
     },
 
-    //Guardar la nota que pone el usuario a una serie
+    //Falta probarlo
+    updateComentario: function (req, res) {
+        const params = req.body;
+        const comentario = params.comentarioId;
+        const peliId = params.peliculaId;
+        const usuarioId = params.usuarioId;
+        const fecha = new Date();
+
+        if (usuarioId != req.usuario.sub) {
+            return res.status(500).send({
+                message: "No tienes permisos para escribir una crítica"
+            });
+        }
+
+        Pelicula.findById(peliId, (err, pelicula) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            } else {
+                for(let i=0; i<pelicula.comentarios; i++){
+                    if (pelicula.comenatios[i]._id == comentario && pelicula.comentarios[i].usuario == usuarioId) {
+                        pelicula.comentarios.set(i, { texto: params.texto, fecha: fecha} )
+                        status = true;
+                        break;           
+                    }
+                }
+               /* pelicula.comentarios.forEach((element) => {
+                    if (element._id == comentario && element.usuario == usuarioId) {
+                        console.log(element._id)
+                        
+                        console.log('elimina')
+                        status = true;
+                    }
+                });*/
+            }
+
+            if(status == true){
+                console.log('entra')
+                pelicula.save();
+                return res.status(200).send({
+                    message: "Modificado"
+                });
+            }else {
+                return res.status(400).send({
+                    message: "Este usuario no ha escrito este comentario"
+                });
+            }
+        })
+
+    },
+
+    //Falta probar funcionamiento
+    deleteComentario: function (req, res) {
+        const params = req.body;
+        const comentario = params.comentarioId;
+        const peliId = params.peliculaId;
+        const usuarioId = params.usuarioId;
+        let status = false;
+
+        if (usuarioId != req.usuario.sub) {
+            return res.status(500).send({
+                message: "No tienes permisos para escribir una crítica"
+            });
+        }
+
+        Pelicula.findById(peliId, (err, pelicula) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            } else {
+                for(let i=0; i<pelicula.comentarios; i++){
+                    if (pelicula.comenatios[i]._id == comentario && pelicula.comentarios[i].usuario == usuarioId) {
+                        element.remove();
+                        console.log('elimina')
+                        status = true;
+                        break;           
+                    }
+                }
+
+                /*pelicula.comentarios.forEach((element) => {
+                    if (element._id == comentario && element.usuario == usuarioId) {
+                        console.log(element._id)
+                        element.remove();
+                        console.log('elimina')
+                        status = true;           
+                    }
+                });*/
+
+                if(status == true){
+                    console.log('entra')
+                    pelicula.save();
+                    return res.status(200).send({
+                        message: "Eliminado"
+                    });
+                }else {
+                    return res.status(400).send({
+                        message: "Este usuario no ha escrito este comentario"
+                    });
+                }    
+            }
+        });
+    },
+
+    //Guardar la nota que pone el usuario a una película
     saveNota: function (params, pelicula, res) {
         const usuarioId = params.usuario;
         const peliId = params.peliculaId;
