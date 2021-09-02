@@ -228,29 +228,62 @@ const controller = {
         const userId = req.params.id;
         let update = req.body;
 
-        delete update.pass;
-
         if (userId != req.usuario.sub) {
             return res.status(500).send({
                 message: "No tienes permisos para modificar los datos"
             });
         }
 
-        Usuario.findByIdAndUpdate(userId, update, { new: true }, (err, userUpdate) => {
-            if (err) {
-                return res.status(500).send({
-                    message: "Error al actualizar los datos"
-                });
-            }
-            if (!userUpdate) {
-                return res.status(404).send({
-                    message: "No se ha podido actualizar al usuario"
-                });
-            }
-            return res.status(200).send({
-                userUpdate
+        delete update.pass;
+        delete update.nick;
+
+        if(update.nombre == ''){
+            delete update.nombre;
+        }
+
+        if(update.email == ''){
+            delete update.email;
+            updateUser();
+        } else {
+            console.log(update.email.toLowerCase())
+            Usuario.find({ email: update.email.toLowerCase() }, (err, usuario) => {
+                if (err) {
+                    return res.status(500).send({
+                        message: "Error al mostrar los datos"
+                    });
+                }
+                if (usuario.length >= 1) {
+                    console.log('email mal')
+                    console.log(usuario)
+                    return res.status(200).send({
+                        message: 'Email-Error' 
+                    });
+                } else {
+                    console.log('email bien');
+                    updateUser();
+                }
+                
             });
-        });
+        }
+
+        function updateUser() {
+            Usuario.findByIdAndUpdate(userId, update, { new: true }, (err, userUpdate) => {
+                if (err) {
+                    return res.status(500).send({
+                        message: "Error al actualizar los datos"
+                    });
+                }
+                if (!userUpdate) {
+                    return res.status(404).send({
+                        message: "No se ha podido actualizar al usuario"
+                    });
+                }
+                return res.status(200).send({
+                    userUpdate
+                });
+            });
+        }
+        
     },
 
     seguirUsuario: function (req, res) {
