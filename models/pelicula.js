@@ -19,6 +19,7 @@ const ComentarioSchema = new Schema({
     nick: String,
     texto: String,
     fecha: Date,
+    editado: Boolean,
     usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'},
     respuesta: [{type: mongoose.Schema.Types.ObjectId, ref: 'comentario'}]
 })

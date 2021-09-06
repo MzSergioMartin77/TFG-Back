@@ -78,13 +78,15 @@ const controller = {
     },
 
     getBuscarPeli: function (req, res) {
-        const tituloparam = req.params.titulo;     
+        const tituloparam = req.params.titulo;
         let buscar = "(?i)^" + tituloparam;
 
-        Pelicula.find({ $or: [
-            {$text: {$search: tituloparam, $diacriticSensitive: false}},
-            { titulo: {$regex: buscar}}
-        ]}, (err, pelicula) => {
+        Pelicula.find({
+            $or: [
+                { $text: { $search: tituloparam, $diacriticSensitive: false } },
+                { titulo: { $regex: buscar } }
+            ]
+        }, (err, pelicula) => {
             if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
@@ -286,7 +288,7 @@ const controller = {
                             if (pelicula.criticas[i].usuario == usuarioId) {
                                 pelicula.criticas.set(i, {
                                     nota: params.nota, nick: usuario.nick, titulo: params.titulo,
-                                    texto: params.texto, fecha: fecha,usuario_model: usuario.id_model, usuario: usuarioId
+                                    texto: params.texto, fecha: fecha, usuario_model: usuario.id_model, usuario: usuarioId
                                 });
                                 break;
                             }
@@ -400,7 +402,7 @@ const controller = {
 
         if (usuarioId != req.usuario.sub) {
             return res.status(500).send({
-                message: "No tienes permisos para escribir una crítica"
+                message: "No tienes permisos para escribir un comentario"
             });
         }
 
@@ -417,7 +419,8 @@ const controller = {
                             message: "Error al mostrar los datos"
                         });
                     } else {
-                        pelicula.comentarios.push({ nick: usuario.nick, texto: params.texto, fecha: fecha, usuario: usuarioId });
+                        pelicula.comentarios.push({ usuario: usuarioId, nick: usuario.nick, texto: params.texto,
+                             fecha: fecha, editado: false });
                         pelicula.save();
                         return res.status(200).send({
                             message: "Guardado"
@@ -428,59 +431,69 @@ const controller = {
         });
     },
 
-    //Falta probarlo
+    
     updateComentario: function (req, res) {
         const params = req.body;
         const comentario = params.comentarioId;
         const peliId = params.peliculaId;
         const usuarioId = params.usuarioId;
         const fecha = new Date();
+        let status = false;
 
         if (usuarioId != req.usuario.sub) {
             return res.status(500).send({
-                message: "No tienes permisos para escribir una crítica"
+                message: "No tienes permisos para escribir un comentario"
             });
         }
 
         Pelicula.findById(peliId, (err, pelicula) => {
+            console.log('-----')
             if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
                 });
-            } else {
-                for(let i=0; i<pelicula.comentarios; i++){
+            }
+            else if (!pelicula){
+                return res.status(404).send({
+                    message: "No se ha encontrado la película"
+                });
+            } 
+            else {
+                console.log('prueba')
+                /*for(let i=0; i<pelicula.comentarios; i++){
                     if (pelicula.comenatios[i]._id == comentario && pelicula.comentarios[i].usuario == usuarioId) {
-                        pelicula.comentarios.set(i, { texto: params.texto, fecha: fecha} )
+                        console.log('entramos');
+                        pelicula.comentarios.set(i, {_id: comentario, usuario: usuarioId, nick: element.nick,
+                            texto: params.texto, fecha: fecha, editado: true });
                         status = true;
-                        break;           
-                    }
-                }
-               /* pelicula.comentarios.forEach((element) => {
+                    }      
+                }*/
+                
+                pelicula.comentarios.forEach((element, i) => {
                     if (element._id == comentario && element.usuario == usuarioId) {
                         console.log(element._id)
-                        
-                        console.log('elimina')
+                        pelicula.comentarios.set(i, {_id: comentario, usuario: usuarioId, nick: element.nick,
+                             texto: params.texto, fecha: fecha, editado: true })
                         status = true;
                     }
-                });*/
-            }
+                });
 
-            if(status == true){
-                console.log('entra')
-                pelicula.save();
-                return res.status(200).send({
-                    message: "Modificado"
-                });
-            }else {
-                return res.status(400).send({
-                    message: "Este usuario no ha escrito este comentario"
-                });
+                if (status == true) {
+                    console.log('entra')
+                    pelicula.save();
+                    return res.status(200).send({
+                        message: "Modificado"
+                    });
+                } else {
+                    return res.status(404).send({
+                        message: "Este usuario no ha escrito este comentario"
+                    });
+                }
             }
-        })
+        });
 
     },
 
-    //Falta probar funcionamiento
     deleteComentario: function (req, res) {
         const params = req.body;
         const comentario = params.comentarioId;
@@ -500,35 +513,35 @@ const controller = {
                     message: "Error al mostrar los datos"
                 });
             } else {
-                for(let i=0; i<pelicula.comentarios; i++){
+                /*for (let i = 0; i < pelicula.comentarios; i++) {
                     if (pelicula.comenatios[i]._id == comentario && pelicula.comentarios[i].usuario == usuarioId) {
                         element.remove();
                         console.log('elimina')
                         status = true;
-                        break;           
+                        break;
                     }
-                }
+                }*/
 
-                /*pelicula.comentarios.forEach((element) => {
+                pelicula.comentarios.forEach((element) => {
                     if (element._id == comentario && element.usuario == usuarioId) {
                         console.log(element._id)
                         element.remove();
                         console.log('elimina')
                         status = true;           
                     }
-                });*/
+                });
 
-                if(status == true){
+                if (status == true) {
                     console.log('entra')
                     pelicula.save();
                     return res.status(200).send({
                         message: "Eliminado"
                     });
-                }else {
-                    return res.status(400).send({
-                        message: "Este usuario no ha escrito este comentario"
+                } else {
+                    return res.status(404).send({
+                        message: "Este usuario no ha escrito este comentario o no existe el comentario"
                     });
-                }    
+                }
             }
         });
     },
@@ -627,7 +640,7 @@ const controller = {
                     if (usuario.peliculas[i].pelicula == peliId) {
                         usuario.peliculas.set(i, {
                             titulo: pelicula.titulo, imagen: pelicula.imagen,
-                            nota: params.nota,  id_model: pelicula.id_model, pelicula: peliId
+                            nota: params.nota, id_model: pelicula.id_model, pelicula: peliId
                         });
                         break;
                     }
