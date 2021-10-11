@@ -419,8 +419,10 @@ const controller = {
                             message: "Error al mostrar los datos"
                         });
                     } else {
-                        pelicula.comentarios.push({ usuario: usuarioId, nick: usuario.nick, texto: params.texto,
-                             fecha: fecha, editado: false });
+                        pelicula.comentarios.push({
+                            usuario: usuarioId, nick: usuario.nick, texto: params.texto,
+                            fecha: fecha, editado: false
+                        });
                         pelicula.save();
                         return res.status(200).send({
                             message: "Guardado"
@@ -431,7 +433,7 @@ const controller = {
         });
     },
 
-    
+
     updateComentario: function (req, res) {
         const params = req.body;
         const comentario = params.comentarioId;
@@ -453,11 +455,11 @@ const controller = {
                     message: "Error al mostrar los datos"
                 });
             }
-            else if (!pelicula){
+            else if (!pelicula) {
                 return res.status(404).send({
                     message: "No se ha encontrado la película"
                 });
-            } 
+            }
             else {
                 console.log('prueba')
                 /*for(let i=0; i<pelicula.comentarios; i++){
@@ -468,12 +470,14 @@ const controller = {
                         status = true;
                     }      
                 }*/
-                
+
                 pelicula.comentarios.forEach((element, i) => {
                     if (element._id == comentario && element.usuario == usuarioId) {
                         console.log(element._id)
-                        pelicula.comentarios.set(i, {_id: comentario, usuario: usuarioId, nick: element.nick,
-                             texto: params.texto, fecha: fecha, editado: true })
+                        pelicula.comentarios.set(i, {
+                            _id: comentario, usuario: usuarioId, nick: element.nick,
+                            texto: params.texto, fecha: fecha, editado: true
+                        })
                         status = true;
                     }
                 });
@@ -495,10 +499,9 @@ const controller = {
     },
 
     deleteComentario: function (req, res) {
-        const params = req.body;
-        const comentario = params.comentarioId;
-        const peliId = params.peliculaId;
-        const usuarioId = params.usuarioId;
+        const peliId = req.params.pelicula;
+        const usuarioId = req.params.usuario;
+        const comentario = req.params.comentario;
         let status = false;
 
         if (usuarioId != req.usuario.sub) {
@@ -527,7 +530,7 @@ const controller = {
                         console.log(element._id)
                         element.remove();
                         console.log('elimina')
-                        status = true;           
+                        status = true;
                     }
                 });
 
@@ -674,6 +677,128 @@ const controller = {
         });
     },
 
+    deleteNota: function (params, pelicula, res) {
+        const usuarioId = params.usuario;
+        const peliId = params.peliculaId;
+        let notaMedia = 0;
+        console.log('eliminar')
+
+        /*function cambioNota() {
+            console.log(notaMedia);
+            notaMedia = notaPelicula(pelicula);
+            if (notaMedia != null) {
+                notaMedia = redondeo(notaMedia, -1);
+            }
+            console.log(notaMedia);
+            let notaUp = {
+                $set: {
+                    nota_media: notaMedia
+                }
+            };
+            Pelicula.findByIdAndUpdate(peliId, notaUp, { new: true }, (err, notaUpdate) => {
+                if (err) {
+                    return res.status(500).send({
+                        message: "Error al guardar la nota media"
+                    });
+                } else {
+                    return res.status(200).send({
+                        message: "Eliminada"
+                    });
+                }
+            });
+        }
+
+        function deleteN() {
+            Usuario.findById(usuarioId, (err, usuario) => {
+                if (err) {
+                    return res.status(500).send({
+                        message: "Error al mostrar los datos"
+                    });
+                } else if (!usuario) {
+                    return res.status(404).send({
+                        message: "Este usuario no se encuentra en la plataforma"
+                    });
+                } else {
+                    pelicula.criticas.forEach((element) => {
+                        if (element.usuario == usuarioId) {
+                            element.remove();
+                            console.log('elminarP')
+                        }
+                    });
+
+                    usuario.peliculas.forEach((element) => {
+                        if (element.pelicula == peliId) {
+                            element.remove();
+                            console.log('elminarU')
+                        }
+                    });
+
+                    console.log('-------');
+                    pelicula.save();
+                    usuario.save();
+
+                    cambioNota();
+                }
+            });
+        }
+
+        deleteN(); */
+        Usuario.findById(usuarioId, (err, usuario) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            } else if (!usuario) {
+                return res.status(404).send({
+                    message: "Este usuario no se encuentra en la plataforma"
+                });
+            } else {
+                pelicula.criticas.forEach((element) => {
+                    if (element.usuario == usuarioId) {
+                        element.remove();
+                        console.log('elminarP')
+                    }
+                });
+
+                usuario.peliculas.forEach((element) => {
+                    if (element.pelicula == peliId) {
+                        element.remove();
+                        console.log('elminarU')
+                    }
+                });
+
+                console.log('-------');
+                pelicula.save();
+                usuario.save();
+
+                console.log(notaMedia);
+                notaMedia = notaPelicula(pelicula);
+                if (notaMedia != null) {
+                    notaMedia = redondeo(notaMedia, -1);
+                }
+                console.log(notaMedia);
+                let notaUp = {
+                    $set: {
+                        nota_media: notaMedia
+                    }
+                };
+                Pelicula.findByIdAndUpdate(peliId, notaUp, { new: true }, (err, notaUpdate) => {
+                    if (err) {
+                        return res.status(500).send({
+                            message: "Error al guardar la nota media"
+                        });
+                    } else {
+                        return res.status(200).send({
+                            message: "Eliminada"
+                        });
+                    }
+                });
+            }
+        });
+    },
+
+
+
     // Función que se realizar antes de guardar una crítica para comprobar si el usuario ya ha puesto una nota o no
     middlewareCritica: function (req, res) {
         const params = req.body;
@@ -693,12 +818,12 @@ const controller = {
         Pelicula.findById(peliId, (err, pelicula) => {
             if (err) {
                 return res.status(500).send({
-                    message: "Error serie"
+                    message: "Error pelicula"
                 });
             }
             else if (!pelicula) {
                 return res.status(404).send({
-                    message: "Esta serie no se encuentra en la plataforma"
+                    message: "Esta película no se encuentra en la plataforma"
                 });
             }
             else {
@@ -734,6 +859,8 @@ const controller = {
         const usuarioId = params.usuario;
         const peliId = params.peliculaId;
         let status = 'new';
+        const nota = params.nota;
+        console.log(nota);
 
         if (usuarioId != req.usuario.sub) {
             console.log(req.usuario.sub);
@@ -745,12 +872,12 @@ const controller = {
         Pelicula.findById(peliId, (err, pelicula) => {
             if (err) {
                 return res.status(500).send({
-                    message: "Error serie"
+                    message: "Error pelicula"
                 });
             }
             else if (!pelicula) {
                 return res.status(404).send({
-                    message: "Esta serie no se encuentra en la plataforma"
+                    message: "Esta película no se encuentra en la plataforma"
                 });
             }
             else {
@@ -758,6 +885,40 @@ const controller = {
                     if (pelicula.criticas[i].usuario == usuarioId) {
                         status = 'update';
                         break;
+                    }
+                }
+            }
+            if (nota == 'No vista') {
+
+                pelicula.criticas.forEach((element) => {
+                    if (element.usuario == usuarioId) {
+                        if (element.texto != null) {
+                            status = 'false';
+                        }
+                    }
+                });
+
+                /*for (let i = 0; i < pelicula.criticas.length; i++) {
+                    if (pelicula.criticas[i].usuario == usuarioId) {
+                        if (pelicula.criticas[i].texto != null) {
+                            status = 'false';
+                            break;
+                        }
+                        break;
+                    }
+                }*/
+                if (status == 'false') {
+                    return res.status(200).send({
+                        message: "Error nota"
+                    });
+                } else {
+                    if (status == 'new') {
+                        return res.status(200).send({
+                            message: "No se guarda la nota"
+                        });
+                    } else {
+                        status = 'true';
+                        controller.deleteNota(params, pelicula, res)
                     }
                 }
             }

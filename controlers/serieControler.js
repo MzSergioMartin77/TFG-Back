@@ -415,6 +415,12 @@ const controller = {
         const usuarioId = params.usuarioId;
         const fecha = new Date();
 
+        if (usuarioId != req.usuario.sub) {
+            return res.status(500).send({
+                message: "No tienes permisos para escribir un comentario"
+            });
+        }
+
         Serie.findById(serieId, (err, serie) => {
             if (err) {
                 return res.status(500).send({
@@ -428,7 +434,11 @@ const controller = {
                             message: "Error al mostrar los datos"
                         });
                     } else {
-                        serie.comentarios.push({ nick: usuario.nick, texto: params.texto, fecha: fecha, usuario: usuarioId });
+                        serie.comentarios.push({
+                            usuario: usuarioId, nick: usuario.nick, texto: params.texto,
+                            fecha: fecha, editado: false
+                        });
+
                         serie.save();
                         return res.status(200).send({
                             message: "Guardado"
@@ -438,6 +448,107 @@ const controller = {
             }
         });
     },
+
+    //Actualizar un comentario 
+    updateComentario: function (req, res) {
+        const params = req.body;
+        const comentario = params.comentarioId;
+        const serieId = params.serieId;
+        const usuarioId = params.usuarioId;
+        const fecha = new Date();
+        let status = false;
+
+        if (usuarioId != req.usuario.sub) {
+            return res.status(500).send({
+                message: "No tienes permisos para escribir un comentario"
+            });
+        }
+
+        Serie.findById(serieId, (err, serie) => {
+            console.log('-----')
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            }
+            else if (!serie) {
+                return res.status(404).send({
+                    message: "No se ha encontrado la película"
+                });
+            }
+            else {
+                console.log('prueba')
+
+                serie.comentarios.forEach((element, i) => {
+                    if (element._id == comentario && element.usuario == usuarioId) {
+                        console.log(element._id)
+                        serie.comentarios.set(i, {
+                            _id: comentario, usuario: usuarioId, nick: element.nick,
+                            texto: params.texto, fecha: fecha, editado: true
+                        })
+                        status = true;
+                    }
+                });
+
+                if (status == true) {
+                    console.log('entra')
+                    serie.save();
+                    return res.status(200).send({
+                        message: "Modificado"
+                    });
+                } else {
+                    return res.status(404).send({
+                        message: "Este usuario no ha escrito este comentario"
+                    });
+                }
+            }
+        });
+
+    },
+
+    //Eliminar un comentario
+    deleteComentario: function (req, res) {
+        const serieId = req.params.serie;
+        const usuarioId = req.params.usuario;
+        const comentario = req.params.comentario;
+        let status = false;
+
+        if (usuarioId != req.usuario.sub) {
+            return res.status(500).send({
+                message: "No tienes permisos para escribir una crítica"
+            });
+        }
+
+        Serie.findById(serieId, (err, serie) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            } else {
+                serie.comentarios.forEach((element) => {
+                    if (element._id == comentario && element.usuario == usuarioId) {
+                        console.log(element._id)
+                        element.remove();
+                        console.log('elimina')
+                        status = true;
+                    }
+                });
+
+                if (status == true) {
+                    console.log('entra')
+                    serie.save();
+                    return res.status(200).send({
+                        message: "Eliminado"
+                    });
+                } else {
+                    return res.status(404).send({
+                        message: "Este usuario no ha escrito este comentario o no existe el comentario"
+                    });
+                }
+            }
+        });
+    },
+
 
     //Guardar la nota que pone el usuario a una serie
     saveNota: function (params, serie, res) {
@@ -566,6 +677,67 @@ const controller = {
         });
     },
 
+    //Función para borrar la nota de una crítica 
+    deleteNota: function (params, serie, res) {
+        const usuarioId = params.usuario;
+        const serieId = params.serieId;
+        let notaMedia = 0;
+        console.log('eliminar')
+
+        Usuario.findById(usuarioId, (err, usuario) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            } else if (!usuario) {
+                return res.status(404).send({
+                    message: "Este usuario no se encuentra en la plataforma"
+                });
+            } else {
+                serie.criticas.forEach((element) => {
+                    if (element.usuario == usuarioId) {
+                        element.remove();
+                        console.log('elminarP')
+                    }
+                });
+
+                usuario.series.forEach((element) => {
+                    if (element.serie == serieId) {
+                        element.remove();
+                        console.log('elminarU')
+                    }
+                });
+
+                console.log('-------');
+                serie.save();
+                usuario.save();
+
+                console.log(notaMedia);
+                notaMedia = notaSerie(serie);
+                if (notaMedia != null) {
+                    notaMedia = redondeo(notaMedia, -1);
+                }
+                console.log(notaMedia);
+                let notaUp = {
+                    $set: {
+                        nota_media: notaMedia
+                    }
+                };
+                Serie.findByIdAndUpdate(serieId, notaUp, { new: true }, (err, notaUpdate) => {
+                    if (err) {
+                        return res.status(500).send({
+                            message: "Error al guardar la nota media"
+                        });
+                    } else {
+                        return res.status(200).send({
+                            message: "Eliminada"
+                        });
+                    }
+                });
+            }
+        });
+    },
+
     // Función que se realizar antes de guardar una crítica para comprobar si el usuario ya ha puesto una nota o no
     middlewareCritica: function (req, res) {
         const params = req.body;
@@ -625,6 +797,7 @@ const controller = {
         const usuarioId = params.usuario;
         const serieId = params.serieId;
         let status = 'new';
+        const nota = params.nota;
 
         if (usuarioId != req.usuario.sub) {
             console.log(req.usuario.sub);
@@ -652,6 +825,34 @@ const controller = {
                     }
                 }
             }
+
+            if (nota == 'No vista') {
+
+                serie.criticas.forEach((element) => {
+                    if (element.usuario == usuarioId) {
+                        if (element.texto != null) {
+                            status = 'false';
+                        }
+                    }
+                });
+
+                if (status == 'false') {
+                    return res.status(200).send({
+                        message: "Error nota"
+                    });
+                } else {
+                    if (status == 'new') {
+                        return res.status(200).send({
+                            message: "No se guarda la nota"
+                        });
+                    } else {
+                        status = 'true';
+                        controller.deleteNota(params, serie, res)
+                    }
+                }
+            }
+
+
             if (status == 'new') {
                 console.log('nueva')
                 controller.saveNota(params, serie, res);
