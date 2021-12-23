@@ -1,7 +1,7 @@
 let { model} = require('@tensorflow/tfjs-node');
 const tf = require('@tensorflow/tfjs-node');
-const movie_arr = tf.range(0, 100);
 const movie_len = 100;
+const movie_arr = tf.range(0, movie_len);
 
 async function loadModel() {
     console.log('Loading Model...')

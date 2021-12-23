@@ -12,6 +12,8 @@ const rondas = 10;
 const jwt = require('../services/jwt');
 const fs = require('fs');
 const path = require('path');
+const pelicula = require('../models/pelicula');
+//const userModel = 25;
 
 function criticasUser(usuario, criticas) {
     console.log('las criticas')
@@ -253,11 +255,19 @@ const controller = {
                     });
                 }
                 if (usuario.length >= 1) {
-                    console.log('email mal')
-                    console.log(usuario)
-                    return res.status(200).send({
-                        message: 'Email-Error' 
-                    });
+                    console.log(usuario[0]._id)
+                    console.log('---------')
+                    console.log(userId)
+                    if(usuario[0]._id == userId){
+                        console.log('email bien');
+                        updateUser();
+                    } else{
+                        console.log('email mal');
+                        return res.status(200).send({
+                            message: 'Email-Error' 
+                        });
+                    }
+                    
                 } else {
                     console.log('email bien');
                     updateUser();
@@ -501,7 +511,42 @@ const controller = {
                     message: "No existe ningúna usuario con este identificador"
                 });
             } else {
-
+                let obras = usuario.peliculas.length + usuario.series.length
+                if(obras < 10){
+                    Pelicula.find({}).sort({ "nota_media": -1 }).limit(10).exec((err, pelicula) => {
+                        Serie.find({}).sort({ "nota_media": -1 }).limit(10).exec((err, serie) => {
+                            console.log(pelicula[0]._id);
+                            for(let i=0; i<10; i++){
+                                console.log(pelicula[i]._id);
+                                recomendaciones.push({ id: pelicula[i]._id, titulo: pelicula[i].titulo, imagen: pelicula[i].imagen, tipo: 'pelicula' });
+                                recomendaciones.push({ id: serie[i]._id, titulo: serie[i].titulo, imagen: serie[i].imagen, tipo: 'serie' });
+                            }
+                            console.log(recomendaciones[0])
+                            for(let j in recomendaciones){
+                                console.log('---')
+                                for(let i in usuario.peliculas){
+                                    if(recomendaciones[j].titulo == usuario.peliculas[i].titulo){
+                                        console.log('entra')
+                                        recomendaciones.splice(j, 1)
+                                    }
+                                }
+                                for(let x in usuario.series){
+                                    console.log('ser')
+                                    if(recomendaciones[j].titulo == usuario.series[x].titulo){
+                                        recomendaciones.splice(j, 1)
+                                    }
+                                }    
+                            }
+                            /*let borrar = 10 - recomendaciones.length;
+                            recomendaciones.slice(5, borrar)*/
+                            //console.log(recomendaciones);
+                            return res.status(200).send({
+                                recomendaciones
+                            });
+                        });
+                    });
+                    
+                }else{
                 criticasUser(usuario, criticas).then(() => {
                     modelo.recommend(usuario.id_model, criticas).then((recom) => {
                         buscarRecom(recom, recomendaciones, res)
@@ -529,7 +574,7 @@ const controller = {
 
                     })
                 })
-
+            }
 
 
                 /*criticasUser(usuario, criticas).then(() => {
@@ -545,6 +590,7 @@ const controller = {
             }
 
         })
+        
 
         /*recom.forEach(element => {
             Serie.find({id_model: element.id_model}, (err, serie) => {

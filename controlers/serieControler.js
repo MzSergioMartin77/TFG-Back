@@ -97,10 +97,65 @@ const controller = {
         });
     },
 
+    //Buscar series por el genero
+    getBuscarSerieG: function (req, res) {
+        let generoparam = req.params.genero;
+        console.log(generoparam);
+        if(generoparam === 'accion'){
+            generoparam = 'acción'
+        }
+        if(generoparam === 'ciencia ficcion'){
+            generoparam = 'ciencia ficción'
+        }
+        if(generoparam === 'fantasia'){
+            generoparam = 'fantástico'
+        }
+        if(generoparam === 'animacion'){
+            generoparam = 'animación'
+        }
+        Serie.find({
+           generos: { $regex: "(?i)"+generoparam }
+        }, (err, serie) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            }
+            if (serie == "") {
+                return res.status(404).send({
+                    message: "No existe ningúna Serie de este género"
+                });
+            }
+            return res.status(200).send({
+                serie
+            });
+        });
+    },
+
     //Coge las 6 series más nuevas 
     getSeries: function (req, res) {
 
         Serie.find({}).sort({ "inicio": -1 }).limit(6).exec((err, serie) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            }
+            if (!serie) {
+                return res.status(404).send({
+                    message: "No hay ninguna serie en la base de datos"
+                });
+            }
+            return res.status(200).send({
+                serie
+            });
+        });
+    },
+
+    //Coge las 6 series con más nota
+    getSeriesP: function (req, res) {
+
+        Serie.find({}).sort({ "nota-media": -1 }).limit(6).exec((err, serie) => {
             if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"

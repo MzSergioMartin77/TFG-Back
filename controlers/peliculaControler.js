@@ -103,10 +103,65 @@ const controller = {
         });
     },
 
+    //Buscar películas por el genero
+    getBuscarPeliG: function (req, res) {
+        let generoparam = req.params.genero;
+        console.log(generoparam);
+        if(generoparam === 'accion'){
+            generoparam = 'acción'
+        }
+        if(generoparam === 'ciencia ficcion'){
+            generoparam = 'ciencia ficción'
+        }
+        if(generoparam === 'fantasia'){
+            generoparam = 'fantasía'
+        }
+        if(generoparam === 'animacion'){
+            generoparam = 'animación'
+        }
+        Pelicula.find({
+           generos: { $regex: "(?i)"+generoparam }
+        }, (err, pelicula) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            }
+            if (pelicula == "") {
+                return res.status(404).send({
+                    message: "No existe ningúna Película de este género"
+                });
+            }
+            return res.status(200).send({
+                pelicula
+            });
+        });
+    },
+
     //Coge las 6 películas más nuevas 
     getPeliculas: function (req, res) {
 
         Pelicula.find({}).sort({ "fecha_estreno": -1 }).limit(6).exec((err, pelicula) => {
+            if (err) {
+                return res.status(500).send({
+                    message: "Error al mostrar los datos"
+                });
+            }
+            if (!pelicula) {
+                return res.status(404).send({
+                    message: "No hay ninguna película en la base de datos"
+                });
+            }
+            return res.status(200).send({
+                pelicula
+            });
+        });
+    },
+
+    //Coge las 6 películas con mejor nota media
+    getPelisP: function (req, res) {
+
+        Pelicula.find({}).sort({ "nota_media": -1 }).limit(6).exec((err, pelicula) => {
             if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"

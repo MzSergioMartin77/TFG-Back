@@ -2,7 +2,7 @@
 
 //Inicialización y configuración de expresss
 var express = require('express'); //Para trabajar con rutas
-var bodyParser = require('body-parser'); //Para realizar la conversión de las poticiones
+var bodyParser = require('body-parser'); //Para realizar la conversión de las peticiones
 
 const rutas = require('./routes/routes');
 const cors = require('cors');
@@ -12,7 +12,7 @@ const config = {
         cors: {
             server: [
                 {
-                    origin: "localhost:4200", //servidor que deseas que consuma o (*) en caso que sea acceso libre
+                    origin: "localhost:4200", //servidor que va a acceder a la API rest
                     credentials: true
                 }
             ]
