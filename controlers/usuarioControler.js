@@ -15,6 +15,7 @@ const path = require('path');
 const pelicula = require('../models/pelicula');
 //const userModel = 25;
 
+//Se crea una lista con los id_model de las películas y series vistas por el usuario
 function criticasUser(usuario, criticas) {
     console.log('las criticas')
     console.log(usuario._id)
@@ -32,6 +33,7 @@ function criticasUser(usuario, criticas) {
     })
 }
 
+//Se hace una nueva lista con las recomendaciones pasando de tener solo los id_model a tener la información que se va a mostrar 
 function buscarRecom(recom, recomendaciones, res) {
     console.log('primero')
     //console.log(recom)
@@ -44,6 +46,7 @@ function buscarRecom(recom, recomendaciones, res) {
             }
             if (peli != '') {
                 console.log(peli[0].titulo)
+                //Si se encuentra el id_model se añade a la lista el titulo, el id, la imagen y el tipo de la película
                 recomendaciones.push({ id: peli[0]._id, titulo: peli[0].titulo, imagen: peli[0].imagen, tipo: 'pelicula' });
             }
         })
@@ -57,6 +60,8 @@ function buscarRecom(recom, recomendaciones, res) {
             }
             x += 1;
             console.log(x);
+            /*Cuando se recorre entera la lista que nos ha dado el recomendador se acaba el bucle y 
+                se le pasa la nueva lista con toda la información que se le muestra al usuario */
             if (x == recom.length) {
                 return res.status(200).send({
                     recomendaciones
@@ -231,7 +236,7 @@ const controller = {
         let update = req.body;
 
         if (userId != req.usuario.sub) {
-            return res.status(500).send({
+            return res.status(401).send({
                 message: "No tienes permisos para modificar los datos"
             });
         }
@@ -284,7 +289,7 @@ const controller = {
                     });
                 }
                 if (!userUpdate) {
-                    return res.status(404).send({
+                    return res.status(500).send({
                         message: "No se ha podido actualizar al usuario"
                     });
                 }
@@ -308,7 +313,7 @@ const controller = {
                 });
             }
             else if (!identificado) {
-                return res.status(404).send({
+                return res.status(500).send({
                     message: "No existe ningúna usuario con este identificador"
                 });
             } else {
@@ -319,7 +324,7 @@ const controller = {
                         });
                     }
                     else if (!usuario) {
-                        return res.status(404).send({
+                        return res.status(500).send({
                             message: "No existe ningúna usuario con este identificador"
                         });
                     } else {
@@ -345,7 +350,7 @@ const controller = {
                                 message: "Guardado"
                             });
                         } else {
-                            return res.status(404).send({
+                            return res.status(200).send({
                                 message: "Ya sigue ha este usuario"
                             });
                         }
@@ -418,10 +423,11 @@ const controller = {
     },
 
     uploadImagen: function (req, res) {
+        console.log(req.files);
         const userId = req.params.usuario;
 
         if (req.files) {
-            let file_path = req.files.imagen.path;
+            let file_path = req.files.file.path;
             let file_split = file_path.split('\\');
             console.log(file_split);
 
@@ -434,7 +440,7 @@ const controller = {
             if (userId != req.usuario.sub) {
                 console.log('fallo');
                 return fs.unlink(file_path, () => {
-                    return res.status(200).send({
+                    return res.status(403).send({
                         message: "No tienes permisos para poner una imagen de perfil"
                     });
                 });
@@ -449,7 +455,7 @@ const controller = {
                         });
                     }
                     if (!userUpdate) {
-                        return res.status(404).send({
+                        return res.status(500).send({
                             message: "No se ha podido actualizar al usuario"
                         });
                     }
@@ -459,9 +465,10 @@ const controller = {
                 });
             }
             else {
+                console.log('imagen falsa')
                 return fs.unlink(file_path, () => {
                     return res.status(200).send({
-                        message: "La extensión no es válida"
+                        message: "Este fichero no es una imagen"
                     });
                 });
 
@@ -512,7 +519,10 @@ const controller = {
                 });
             } else {
                 let obras = usuario.peliculas.length + usuario.series.length
+                //Se comprueba si el usuario ha visto más de 10 películas o series 
                 if(obras < 10){
+                    /*Si ha visto menos de 10 obras no se ejecuta el recomendador y se le recomiendan las 10 obras
+                        con mayor nota media de la plataforma que no haya visto */
                     Pelicula.find({}).sort({ "nota_media": -1 }).limit(10).exec((err, pelicula) => {
                         Serie.find({}).sort({ "nota_media": -1 }).limit(10).exec((err, serie) => {
                             console.log(pelicula[0]._id);

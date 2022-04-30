@@ -63,6 +63,7 @@ router.put('/updateUsuario/:id', md_aut.ensureAuth, usuarioController.updateUsua
 router.get('/seguir/:identificado/:usuario', md_aut.ensureAuth, usuarioController.seguirUsuario);
 router.delete('/dejarSeguir/:identificado/:usuario', md_aut.ensureAuth, usuarioController.dejarSeguir);
 router.post('/uploadImagen/:usuario', [md_aut.ensureAuth, md_imagen], usuarioController.uploadImagen);
+//router.post('/uploadImagen/:usuario', md_aut.ensureAuth, usuarioController.uploadImagen);
 router.get('/getImagen/:imagen', usuarioController.getImagen);
 router.get('/recomendaciones/:id', md_aut.ensureAuth, usuarioController.recomendar);
 
