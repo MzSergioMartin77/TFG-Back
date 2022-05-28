@@ -13,7 +13,7 @@ const jwt = require('../services/jwt');
 const fs = require('fs');
 const path = require('path');
 const pelicula = require('../models/pelicula');
-//const userModel = 25;
+const userModel = 25;
 
 //Se crea una lista con los id_model de las películas y series vistas por el usuario
 function criticasUser(usuario, criticas) {
@@ -518,35 +518,44 @@ const controller = {
                     message: "No existe ningúna usuario con este identificador"
                 });
             } else {
+                let aux = [{ id: String, titulo: String, imagen: String, tipo: String }];
                 let obras = usuario.peliculas.length + usuario.series.length
                 //Se comprueba si el usuario ha visto más de 10 películas o series 
-                if(obras < 10){
+                if(obras < 10 || usuario.id_model > userModel){
                     /*Si ha visto menos de 10 obras no se ejecuta el recomendador y se le recomiendan las 10 obras
                         con mayor nota media de la plataforma que no haya visto */
-                    Pelicula.find({}).sort({ "nota_media": -1 }).limit(10).exec((err, pelicula) => {
-                        Serie.find({}).sort({ "nota_media": -1 }).limit(10).exec((err, serie) => {
+                    Pelicula.find({}).sort({ "nota_media": -1 }).limit(15).exec((err, pelicula) => {
+                        Serie.find({}).sort({ "nota_media": -1 }).limit(15).exec((err, serie) => {
                             console.log(pelicula[0]._id);
-                            for(let i=0; i<10; i++){
+                            for(let i=0; i<15; i++){
                                 console.log(pelicula[i]._id);
-                                recomendaciones.push({ id: pelicula[i]._id, titulo: pelicula[i].titulo, imagen: pelicula[i].imagen, tipo: 'pelicula' });
-                                recomendaciones.push({ id: serie[i]._id, titulo: serie[i].titulo, imagen: serie[i].imagen, tipo: 'serie' });
+                                aux.push({ id: pelicula[i]._id, titulo: pelicula[i].titulo, imagen: pelicula[i].imagen, tipo: 'pelicula' });
+                                aux.push({ id: serie[i]._id, titulo: serie[i].titulo, imagen: serie[i].imagen, tipo: 'serie' });
                             }
-                            console.log(recomendaciones[0])
-                            for(let j in recomendaciones){
+                            console.log(aux[0])
+                            for(let j in aux){
                                 console.log('---')
                                 for(let i in usuario.peliculas){
-                                    if(recomendaciones[j].titulo == usuario.peliculas[i].titulo){
+                                    if(aux[j].titulo == usuario.peliculas[i].titulo){
                                         console.log('entra')
-                                        recomendaciones.splice(j, 1)
+                                        aux.splice(j, 1, {tipo: 'eliminar'})
                                     }
                                 }
                                 for(let x in usuario.series){
-                                    console.log('ser')
-                                    if(recomendaciones[j].titulo == usuario.series[x].titulo){
-                                        recomendaciones.splice(j, 1)
+                                    if(aux[j].titulo == usuario.series[x].titulo){
+                                        console.log('entra2')
+                                        aux.splice(j, 1, {tipo: 'eliminar'})
                                     }
                                 }    
                             }
+                            console.log('prueba')
+                            console.log(aux.length)
+                            /*for(let i in aux){
+                                console.log(aux[i])
+                                recomendaciones.splice(aux[i], 1)
+                            }*/
+                            recomendaciones = aux.filter((item) => item.tipo !== 'eliminar')
+                            console.log(recomendaciones.length)
                             /*let borrar = 10 - recomendaciones.length;
                             recomendaciones.slice(5, borrar)*/
                             //console.log(recomendaciones);
