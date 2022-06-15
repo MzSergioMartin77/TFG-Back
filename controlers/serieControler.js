@@ -893,7 +893,7 @@ const controller = {
 
                 if (status == 'false') {
                     return res.status(200).send({
-                        message: "Error nota"
+                        message: "Error-nota"
                     });
                 } else {
                     if (status == 'new') {
@@ -909,9 +909,7 @@ const controller = {
 
 
             if (status == 'new') {
-                console.log('nueva')
                 controller.saveNota(params, serie, res);
-                //this.saveCritica(params, serie, res);
             }
             if (status == 'update') {
                 controller.updateNota(params, serie, res);

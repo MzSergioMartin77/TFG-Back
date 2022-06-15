@@ -1,7 +1,19 @@
 let { model} = require('@tensorflow/tfjs-node');
 const tf = require('@tensorflow/tfjs-node');
-const movie_len = 100;
+const modelJSON = require('./datos.json');
+const movie_len = movieM();
 const movie_arr = tf.range(0, movie_len);
+
+function movieM(){
+    const datosJson = JSON.parse(JSON.stringify(modelJSON));
+    let listMovie = [];
+    datosJson.forEach(element => {
+        listMovie.push(element.movieId);
+    });
+    const setMovie = new Set(listMovie);
+    
+    return setMovie.size;
+}
 
 async function loadModel() {
     console.log('Loading Model...')

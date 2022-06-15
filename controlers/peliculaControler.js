@@ -964,7 +964,7 @@ const controller = {
                 }*/
                 if (status == 'false') {
                     return res.status(200).send({
-                        message: "Error nota"
+                        message: "Error-nota"
                     });
                 } else {
                     if (status == 'new') {

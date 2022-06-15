@@ -13,7 +13,19 @@ const jwt = require('../services/jwt');
 const fs = require('fs');
 const path = require('path');
 const pelicula = require('../models/pelicula');
-const userModel = 25;
+const modelJSON = require('../model_tf/datos.json');
+
+
+function userM(){
+    const datosJson = JSON.parse(JSON.stringify(modelJSON));
+    let listUser = [];
+    datosJson.forEach(element => {
+        listUser.push(element.userId);
+    });
+    const setUser = new Set(listUser);
+    
+    return setUser.size;
+}
 
 //Se crea una lista con los id_model de las películas y series vistas por el usuario
 function criticasUser(usuario, criticas) {
@@ -500,6 +512,7 @@ const controller = {
         const userId = req.params.id;
         let criticas = [];
         let recomendaciones = [{ id: String, titulo: String, imagen: String, tipo: String }];
+        let userModel = userM();
 
         if (userId != req.usuario.sub) {
             return res.status(403).send({
