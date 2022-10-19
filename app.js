@@ -13,7 +13,7 @@ const config = {
         cors: {
             server: [
                 {
-                    origin: "localhost:4200", //servidor al que se le va a permitir acceder a la API rest
+                    origin: "localhost:4200", //url al que se le va a permitir acceder a la API rest
                     credentials: true
                 }
             ]

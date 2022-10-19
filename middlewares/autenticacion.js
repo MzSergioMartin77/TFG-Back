@@ -4,6 +4,7 @@ const jwt = require('jwt-simple');
 const moment = require('moment');
 const secret = 'The_Legend_of_Zelda';
 
+//Se comprueba que se tenga el token y si es valido
 exports.ensureAuth = function(req, res, next){
     if(!req.headers.authorization){
         return res.status(403).send({message: 'No se tiene la cabecera de autentificacion'});

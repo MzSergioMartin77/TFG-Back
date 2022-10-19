@@ -6,7 +6,7 @@ const app = require('./app');
 const port = 3700; //Puerto del servidor
 
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/TFGdb',
+mongoose.connect('mongodb://localhost:27017/TFGdb', //Conexión con nuestra base de datos
     {useNewUrlParser: true,
     useUnifiedTopology: true})
     .then(() => {

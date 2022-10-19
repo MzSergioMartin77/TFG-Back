@@ -11,6 +11,8 @@ const CriticaSchema = new Schema({
     texto: String,
     fecha: Date,
     usuario_model: Number,
+    //like: Number,
+    //dislike: Number,
     usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'}
 });
 
@@ -20,13 +22,15 @@ const ComentarioSchema = new Schema({
     texto: String,
     fecha: Date,
     editado: Boolean,
+    //like: Number,
+    //dislike: Number,
+    //comRespuesta: {type: mongoose.Schema.Types.ObjectId, ref: 'comentario'},
     usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'},
-    respuesta: [{type: mongoose.Schema.Types.ObjectId, ref: 'comentario'}]
+    respuestas: [{type: mongoose.Schema.Types.ObjectId, ref: 'comentario'}]
 })
 
 //esquema de los datos de las películas
 const PeliSchema = new Schema({
-    _id: mongoose.Schema.Types.ObjectId,
     id_model: Number,
     id_TMDB: Number,
     titulo: String,

@@ -28,6 +28,7 @@ const UsuarioSchema = Schema({
     descripcion: String,
     nick: String,
     imagen: String,
+    rol: String,
     seguidores: [{ 
         nick: String,
         usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'}

@@ -5,6 +5,7 @@ const peliController = require('../controlers/peliculaControler');
 const serieController = require('../controlers/serieControler');
 const proController = require('../controlers/profesionalControler');
 const usuarioController = require('../controlers/usuarioControler');
+const adminController = require('../controlers/adminControler');
 const md_aut = require('../middlewares/autenticacion');
 
 const multipart = require('connect-multiparty');
@@ -66,5 +67,13 @@ router.post('/uploadImagen/:usuario', [md_aut.ensureAuth, md_imagen], usuarioCon
 //router.post('/uploadImagen/:usuario', md_aut.ensureAuth, usuarioController.uploadImagen);
 router.get('/getImagen/:imagen', usuarioController.getImagen);
 router.get('/recomendaciones/:id', md_aut.ensureAuth, usuarioController.recomendar);
+
+//Rutas para administrador
+router.post('/addPelicula', md_aut.ensureAuth, adminController.addPeli);
+router.post('/addSerie', md_aut.ensureAuth, adminController.addSerie);
+router.post('/addProfesional', md_aut.ensureAuth, adminController.addProf);
+router.get('/upPlataformasPeli/:admin', md_aut.ensureAuth, adminController.upPlataformaPeli);
+router.get('/upPlataformasSerie/:admin', md_aut.ensureAuth, adminController.upPlataformaSerie);
+router.get('/upRecomendador/:admin', md_aut.ensureAuth, adminController.datosModelo);
 
 module.exports = router;

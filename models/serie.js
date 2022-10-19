@@ -26,7 +26,6 @@ const ComentarioSchema = new Schema({
 
 //esquema de los datos de las películas
 const SerieSchema = new Schema({
-    _id: mongoose.Schema.Types.ObjectId,
     id_model: Number,
     id_TMDB: Number,
     titulo: String,

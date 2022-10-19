@@ -115,6 +115,7 @@ const controller = {
             usuario.email = params.email;
             usuario.descripcion = params.descripcion;
             usuario.imagen = null;
+            usuario.rol = 'user';
 
             Usuario.find({ email: usuario.email.toLowerCase() }).exec((err, usuarios) => {
                 if (err) return res.status(500).send({ message: 'Error al buscar' });
@@ -567,8 +568,10 @@ const controller = {
                                 console.log(aux[i])
                                 recomendaciones.splice(aux[i], 1)
                             }*/
-                            recomendaciones = aux.filter((item) => item.tipo !== 'eliminar')
-                            console.log(recomendaciones.length)
+                            recomendaciones = aux.filter((item) => item.tipo !== 'eliminar');
+                            console.log(recomendaciones.length);
+                            recomendaciones = recomendaciones.splice(5, 11);
+                            console.log(recomendaciones.length);
                             /*let borrar = 10 - recomendaciones.length;
                             recomendaciones.slice(5, borrar)*/
                             //console.log(recomendaciones);

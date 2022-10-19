@@ -27,7 +27,7 @@ exports.recommend = async function recommend(userId, vistas) {
     let user = tf.fill([movie_len], Number(userId))
     console.log('paso')
     await loadModel()
-    pred_tensor = await model.predict([movie_arr, user]).reshape([100]);
+    pred_tensor = await model.predict([movie_arr, user]).reshape([movie_len]);
     //console.log(pred_tensor);
     pred = pred_tensor.arraySync()
 
