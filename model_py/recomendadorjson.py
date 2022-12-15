@@ -1,3 +1,4 @@
+#!/usr/bin/env python 
 # -*- coding: utf-8 -*-
 """recomendadorJson.ipynb
 
@@ -23,7 +24,7 @@ import tensorflow as tf
 
 # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-ratings_df = pd.read_json('../model_tf/datos.json') 
+ratings_df = pd.read_json(r"C:\Users\Sergi\Documents\Proyectos\TFG\BackTFG\model_tf\datos.json") 
 
 ratings_df.isna().sum()
 
