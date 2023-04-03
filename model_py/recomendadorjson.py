@@ -53,8 +53,8 @@ model.summary()
 
 model.fit([ratings_df.movieId, ratings_df.userId], ratings_df.nota, batch_size=30, epochs=20, verbose=1)
 
-model.save(('./modelpy'))
+model.save(('../modelpy'))
 print("Modelo guardado")
 
-os.system("conda activate C:/Users/Sergi/Anaconda3/envs/tensorflowks & tensorflowjs_converter --input=keras_saved_model  modelpy ../model_tf")
-
+os.system("conda activate C:/Users/Sergi/Anaconda3/envs/tensorflowks & tensorflowjs_converter --input=keras_saved_model  ../modelpy ../model_tf")
+print("Model pasado a js")

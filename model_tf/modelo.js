@@ -1,6 +1,6 @@
 let { model} = require('@tensorflow/tfjs-node');
 const tf = require('@tensorflow/tfjs-node');
-const modelJSON = require('./datos.json');
+const modelJSON = require('../../model_tf/datos.json');
 const movie_len = movieM();
 const movie_arr = tf.range(0, movie_len);
 
@@ -17,7 +17,7 @@ function movieM(){
 
 async function loadModel() {
     console.log('Loading Model...')
-    model = await tf.loadLayersModel("file:///Users/Sergi/Documents/Proyectos/TFG/BackTFG/model_tf/model.json", false);
+    model = await tf.loadLayersModel("file:///Users/Sergi/Documents/Proyectos/TFG/model_tf/model.json", false);
     console.log('Modelo cargado')
     // model.summary()
 }

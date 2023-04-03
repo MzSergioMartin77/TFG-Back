@@ -604,7 +604,7 @@ const controller = {
                             }
                         }
             
-                        //console.log(datos);
+                        console.log(datos);
                         const datosJSON = JSON.stringify(datos);
                         //console.log(datosJSON);
                         fs.writeFile("../model_tf/datos.json", datosJSON, () => {
