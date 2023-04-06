@@ -553,17 +553,29 @@ const controller = {
 
     },
 
-    deleteComentario: function (req, res) {
+    deleteComentario: async function (req, res) {
         const peliId = req.params.pelicula;
         const usuarioId = req.params.usuario;
-        const comentario = req.params.comentario;
+        const comentarioId = req.params.comentario;
         let status = false;
+        let user = new Usuario();
 
         if (usuarioId != req.usuario.sub) {
             return res.status(500).send({
-                message: "No tienes permisos para escribir una crítica"
+                message: "No tienes permisos para escribir un comentario"
             });
         }
+
+        user = await Usuario.findById(usuarioId, (err, usuario) => {
+            if (usuario) {
+                return usuario;
+            }
+            
+            return res.status(500).send({
+                message: "Error al mostrar los datos"
+            });
+        });
+        console.log(user.rol);
 
         Pelicula.findById(peliId, (err, pelicula) => {
             if (err) {
@@ -581,11 +593,11 @@ const controller = {
                 }*/
 
                 pelicula.comentarios.forEach((element) => {
-                    if (element._id == comentario && element.usuario == usuarioId) {
-                        console.log(element._id)
-                        element.remove();
-                        console.log('elimina')
-                        status = true;
+                    if (element._id == comentarioId) {
+                        if(element.usuario == usuarioId || user.rol == 'admin'){
+                            element.remove();
+                            status = true;
+                        }
                     }
                 });
 

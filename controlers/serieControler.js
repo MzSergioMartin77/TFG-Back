@@ -562,17 +562,28 @@ const controller = {
     },
 
     //Eliminar un comentario
-    deleteComentario: function (req, res) {
+    deleteComentario: async function (req, res) {
         const serieId = req.params.serie;
         const usuarioId = req.params.usuario;
         const comentario = req.params.comentario;
         let status = false;
+        let user = new Usuario();
 
         if (usuarioId != req.usuario.sub) {
             return res.status(500).send({
                 message: "No tienes permisos para escribir una crítica"
             });
         }
+
+        user = await Usuario.findById(usuarioId, (err, usuario) => {
+            if (usuario) {
+                return usuario;
+            }
+            
+            return res.status(500).send({
+                message: "Error al mostrar los datos"
+            });
+        });
 
         Serie.findById(serieId, (err, serie) => {
             if (err) {
@@ -581,11 +592,12 @@ const controller = {
                 });
             } else {
                 serie.comentarios.forEach((element) => {
-                    if (element._id == comentario && element.usuario == usuarioId) {
-                        console.log(element._id)
-                        element.remove();
-                        console.log('elimina')
-                        status = true;
+                    if (element._id == comentario) {
+                        if (element.usuario == usuarioId || user.rol == 'admin'){
+                            element.remove();
+                            status = true;
+                        }
+                        
                     }
                 });
 
