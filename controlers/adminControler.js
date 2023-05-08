@@ -216,8 +216,6 @@ function castPr(id, profesional, rest) {
 
 function actualizarModelotf(res) {
 
-    console.log('no puede ser')
-
     const options = {
         mode: 'text',
         pythonPath: 'C:/Users/Sergi/Anaconda3/envs/tensorflowks/python.exe',

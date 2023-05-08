@@ -12,7 +12,6 @@ const rondas = 10;
 const jwt = require('../services/jwt');
 const fs = require('fs');
 const path = require('path');
-const pelicula = require('../models/pelicula');
 const modelJSON = require('../model_tf/datos.json');
 
 
@@ -535,12 +534,12 @@ const controller = {
                 let aux = [{ id: String, titulo: String, imagen: String, tipo: String }];
                 let obras = usuario.peliculas.length + usuario.series.length
                 //Se comprueba si el usuario ha visto más de 10 películas o series 
-                if(obras < 10 || usuario.id_model > userModel){
+                if(obras < 10){
                     /*Si ha visto menos de 10 obras no se ejecuta el recomendador y se le recomiendan las 10 obras
                         con mayor nota media de la plataforma que no haya visto */
                     Pelicula.find({}).sort({ "nota_media": -1 }).limit(15).exec((err, pelicula) => {
                         Serie.find({}).sort({ "nota_media": -1 }).limit(15).exec((err, serie) => {
-                            console.log(pelicula[0]._id);
+                            console.log(pelicula[0].titulo);
                             for(let i=0; i<15; i++){
                                 console.log(pelicula[i]._id);
                                 aux.push({ id: pelicula[i]._id, titulo: pelicula[i].titulo, imagen: pelicula[i].imagen, tipo: 'pelicula' });
@@ -551,7 +550,7 @@ const controller = {
                                 console.log('---')
                                 for(let i in usuario.peliculas){
                                     if(aux[j].titulo == usuario.peliculas[i].titulo){
-                                        console.log('entra')
+                                        console.log(pelicula[i])
                                         aux.splice(j, 1, {tipo: 'eliminar'})
                                     }
                                 }
@@ -564,81 +563,27 @@ const controller = {
                             }
                             console.log('prueba')
                             console.log(aux.length)
-                            /*for(let i in aux){
-                                console.log(aux[i])
-                                recomendaciones.splice(aux[i], 1)
-                            }*/
                             recomendaciones = aux.filter((item) => item.tipo !== 'eliminar');
                             console.log(recomendaciones.length);
-                            recomendaciones = recomendaciones.splice(5, 11);
+                            recomendaciones = recomendaciones.slice(0, 11);
                             console.log(recomendaciones.length);
-                            /*let borrar = 10 - recomendaciones.length;
-                            recomendaciones.slice(5, borrar)*/
-                            //console.log(recomendaciones);
                             return res.status(200).send({
                                 recomendaciones
                             });
                         });
                     });
                     
-                }else{
-                criticasUser(usuario, criticas).then(() => {
-                    modelo.recommend(usuario.id_model, criticas).then((recom) => {
-                        buscarRecom(recom, recomendaciones, res)
-                        /*for (let i in recom) {
-                            console.log(recom[i].id_model)
-                            Pelicula.find({ id_model: recom[i].id_model }, (err, peli) => {
-                                if (err) {
-                                    console.log('Se ha producido un error')
-                                }
-                                if (peli != '') {
-                                    console.log(peli[0].titulo)
-                                    recomendaciones.push({ id: peli[0]._id, titulo: peli[0].titulo, imagen: peli[0].imagen, tipo: 'pelicula' });
-                                }
-                            })
-                            Serie.find({ id_model: recom[i].id_model }, (err, serie) => {
-                                if (err) {
-                                    console.log('Se ha producido un error')
-                                }
-                                if (serie != '') {
-                                    //console.log(serie)
-                                    recomendaciones.push({ id: serie[0]._id, titulo: serie[0].titulo, imagen: serie[0].imagen, tipo: 'serie' });
-                                }
-                            })
-                        }*/
-
-                    })
-                })
-            }
-
-
-                /*criticasUser(usuario, criticas).then(() => {
-                    let recom = await modelo.recommend(usuario.id_model, criticas)
-                    buscarRecom(recom, recomendaciones).then(() => {
-                        console.log('entra')
-                        return res.status(200).send({
-                            recomendaciones
+                } else{
+                    criticasUser(usuario, criticas).then(() => {
+                        modelo.recommend(usuario.id_model, criticas).then((recom) => {
+                            buscarRecom(recom, recomendaciones, res)
                         })
                     })
-                }) */
-
+                }
             }
 
         })
         
-
-        /*recom.forEach(element => {
-            Serie.find({id_model: element.id_model}, (err, serie) => {
-                if(serie){
-                    recomendaciones.push({id: serie._id, titulo: serie.titulo, imagen: serie.imagen, tipo: 'serie'});
-                }
-            })
-            Pelicula.find({id_model: element.id_model}, (err, peli) => {
-                if(peli){
-                    recomendaciones.push({id: peli._id, titulo: peli.titulo, imagen: peli.imagen, tipo: 'pelicula'});
-                }
-            })
-        })*/
     }
 }
 
