@@ -477,61 +477,6 @@ const controller = {
                 message: "La crítica no existe o no pertenece al usuario"
             });
         }
-
-        /*Pelicula.findById(peliId, (err, pelicula) => {
-            if (err) {
-                return res.status(500).send({
-                    message: "Error al mostrar los datos"
-                });
-            } else {
-                Usuario.findById(usuarioId, (err, usuario) => {
-                    if (err) {
-                        return res.status(500).send({
-                            message: "Error al mostrar los datos"
-                        });
-                    } else {
-                        pelicula.criticas.forEach((element) => {
-                            if (element.usuario == usuarioId) {
-                                element.remove();
-                            }
-                        });
-
-                        usuario.peliculas.forEach((element) => {
-                            if (element.pelicula == peliId) {
-                                element.remove();
-                            }
-                        });
-                        console.log('-------');
-                        pelicula.save();
-                        usuario.save();
-                        console.log(notaMedia);
-                        notaMedia = notaPelicula(pelicula);
-                        if (notaMedia != null) {
-                            notaMedia = redondeo(notaMedia, -1);
-                        }
-                        console.log(notaMedia);
-                        let notaUp = {
-                            $set: {
-                                nota_media: notaMedia
-                            }
-                        };
-                        Pelicula.findByIdAndUpdate(peliId, notaUp, { new: true }, (err, notaUpdate) => {
-                            if (err) {
-                                return res.status(500).send({
-                                    message: "Error al guardar la nota media"
-                                });
-                            } else {
-                                return res.status(200).send({
-                                    message: "Eliminada"
-                                });
-                            }
-                        });
-
-                    }
-                });
-            }
-        }); */
-
     },
 
     saveComentario: function (req, res) {

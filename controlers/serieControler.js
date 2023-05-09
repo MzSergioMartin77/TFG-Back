@@ -22,6 +22,9 @@ function redondeo(value, exp) {
 function notaSerie(serie) {
     let notas = 0;
     let n = 0;
+    if (serie.criticas.length == 0) {
+        return null;
+    }
     serie.criticas.forEach(element => {
         notas = notas + element.nota;
         n++;
@@ -401,65 +404,101 @@ const controller = {
     },
 
     //Eliminar la crítica 
-    deleteCritica: function (req, res) {
+    deleteCritica: async function (req, res) {
         const serieId = req.params.serie;
         const usuarioId = req.params.usuario;
+        const criticaId = req.params.critica;
         let notaMedia = 0;
+        let userCritica;
+        let userCriticaId;
+        let status = false;
+        console.log(criticaId);
 
-        Serie.findById(serieId, (err, serie) => {
-            if (err) {
-                return res.status(500).send({
-                    message: "Error al mostrar los datos"
-                });
-            } else {
-                Usuario.findById(usuarioId, (err, usuario) => {
-                    if (err) {
-                        return res.status(500).send({
-                            message: "Error al mostrar los datos"
-                        });
-                    } else {
-                        serie.criticas.forEach((element) => {
-                            if (element.usuario == usuarioId) {
-                                element.remove();
-                            }
-                        });
+        if (usuarioId != req.usuario.sub) {
+            return res.status(500).send({
+                message: "No tienes permisos para eliminar una crítica"
+            });
+        }
 
-                        usuario.series.forEach((element) => {
-                            if (element.serie == serieId) {
-                                element.remove();
-                            }
-                        });
-                        console.log('-------');
-                        serie.save();
-                        usuario.save();
-                        console.log(notaMedia);
-                        notaMedia = notaSerie(serie);
-                        if (notaMedia != null) {
-                            notaMedia = redondeo(notaMedia, -1);
-                        }
-                        console.log(notaMedia);
-                        let notaUp = {
-                            $set: {
-                                nota_media: notaMedia
-                            }
-                        };
-                        Serie.findByIdAndUpdate(serieId, notaUp, { new: true }, (err, notaUpdate) => {
-                            if (err) {
-                                return res.status(500).send({
-                                    message: "Error al guardar la nota media"
-                                });
-                            } else {
-                                return res.status(200).send({
-                                    message: "Eliminada"
-                                });
-                            }
-                        });
-
-                    }
-                });
+        let user = await Usuario.findById(usuarioId, (err, usuario) => {
+            if (usuario) {
+                return usuario;
             }
+            
+            return res.status(500).send({
+                message: "Error al mostrar los datos"
+            });
         });
 
+        let serie = await Serie.findById(serieId, (err, serie) => {
+            if (serie) {
+                return serie;
+            }
+
+            return res.status(500).send({
+                message: "Error al mostrar los datos"
+            });
+        });
+
+        serie.criticas.forEach((element) => {
+            if (element._id == criticaId){
+                if (element.usuario == usuarioId || user.rol == 'admin') {
+                    userCriticaId = element.usuario;
+                    console.log(userCritica);
+                    element.remove();
+                    status = true;
+                }
+            }
+        })
+
+        if (status) {
+            if (user.rol == 'admin') {
+                userCritica = await Usuario.findById(userCriticaId, (err, usuario) => {
+                    if (usuario) {
+                        return usuario;
+                    }
+                    
+                    return res.status(500).send({
+                        message: "Error al mostrar los datos"
+                    });
+                });
+            } else { userCritica = user; }
+
+            userCritica.series.forEach((element) => {
+                if (element.serie == serieId) {
+                    element.remove();
+                }
+            })
+
+            serie.save();
+            userCritica.save();
+            console.log(notaMedia);
+            notaMedia = notaSerie(serie);
+            if (notaMedia != null) {
+                notaMedia = redondeo(notaMedia, -1);
+            }
+            console.log(notaMedia);
+            let notaUp = {
+                $set: {
+                    nota_media: notaMedia
+                }
+            };
+            Serie.findByIdAndUpdate(serieId, notaUp, { new: true }, (err, notaUpdate) => {
+                if (err) {
+                    return res.status(500).send({
+                        message: "Error al guardar la nota media"
+                    });
+                } else {
+                    return res.status(200).send({
+                        message: "Eliminada"
+                    });
+                }
+            });
+        } else {
+            return res.status(500).send({
+                message: "La crítica no existe o no pertenece al usuario"
+            });
+        }
     },
 
     //Guardar comentario

@@ -41,7 +41,7 @@ router.put('/comentarioCupdate', md_aut.ensureAuth, serieController.updateComent
 router.delete('/deleteCcomentario/:serie/:usuario/:comentario', md_aut.ensureAuth, serieController.deleteComentario);
 router.post('/serieCritica', md_aut.ensureAuth, serieController.middlewareCritica);
 router.put('/criticaSupdate', md_aut.ensureAuth, serieController.updateCritica);
-router.delete('/deleteScritica/:serie/:usuario', md_aut.ensureAuth, serieController.deleteCritica);
+router.delete('/deleteScritica/:serie/:usuario/:critica', md_aut.ensureAuth, serieController.deleteCritica);
 router.get('/criticaSerie/:serie/:critica', serieController.getCritica);
 router.get('/buscarSerie/:titulo', serieController.getBuscarSerie);
 router.get('/buscarSerieG/:genero', serieController.getBuscarSerieG);
