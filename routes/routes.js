@@ -23,7 +23,7 @@ router.post('/peliComentario', md_aut.ensureAuth, peliController.saveComentario)
 router.put('/comentarioPupdate', md_aut.ensureAuth, peliController.updateComentario);
 router.delete('/deletePcomentario/:pelicula/:usuario/:comentario', md_aut.ensureAuth, peliController.deleteComentario);
 router.put('/criticaPupdate', md_aut.ensureAuth, peliController.updateCritica);
-router.delete('/deletePcritica/:pelicula/:usuario', md_aut.ensureAuth, peliController.deleteCritica);
+router.delete('/deletePcritica/:pelicula/:usuario/:critica', md_aut.ensureAuth, peliController.deleteCritica);
 router.get('/criticaPeli/:pelicula/:critica', peliController.getCritica);
 router.get('/buscarPeli/:titulo', peliController.getBuscarPeli);
 router.get('/buscarPeliG/:genero',peliController.getBuscarPeliG);

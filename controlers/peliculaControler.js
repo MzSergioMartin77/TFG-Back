@@ -1,6 +1,7 @@
 'use strict'
 
 const Pelicula = require('../models/pelicula');
+const usuario = require('../models/usuario');
 const Usuario = require('../models/usuario');
 const mongoose = require('mongoose');
 mongoose.set('useFindAndModify', false);
@@ -381,18 +382,103 @@ const controller = {
         });
     },
 
-    deleteCritica: function (req, res) {
+    deleteCritica: async function (req, res) {
         const peliId = req.params.pelicula;
         const usuarioId = req.params.usuario;
+        const criticaId = req.params.critica;
         let notaMedia = 0;
+        let userCritica;
+        let userCriticaId;
+        let status = false;
+        console.log(criticaId);
 
         if (usuarioId != req.usuario.sub) {
             return res.status(500).send({
-                message: "No tienes permisos para escribir una crítica"
+                message: "No tienes permisos para eliminar una crítica"
             });
         }
 
-        Pelicula.findById(peliId, (err, pelicula) => {
+        let user = await Usuario.findById(usuarioId, (err, usuario) => {
+            if (usuario) {
+                return usuario;
+            }
+            
+            return res.status(500).send({
+                message: "Error al mostrar los datos"
+            });
+        });
+
+        let peli = await Pelicula.findById(peliId, (err, pelicula) => {
+            if (pelicula) {
+                return pelicula;
+            }
+
+            return res.status(500).send({
+                message: "Error al mostrar los datos"
+            });
+        });
+
+        peli.criticas.forEach((element) => {
+            if (element._id == criticaId){
+                if (element.usuario == usuarioId || user.rol == 'admin') {
+                    userCriticaId = element.usuario;
+                    console.log(userCritica);
+                    element.remove();
+                    status = true;
+                }
+            }
+        })
+
+        if (status) {
+            if (user.rol == 'admin') {
+                userCritica = await Usuario.findById(userCriticaId, (err, usuario) => {
+                    if (usuario) {
+                        return usuario;
+                    }
+                    
+                    return res.status(500).send({
+                        message: "Error al mostrar los datos"
+                    });
+                });
+            } else { userCritica = user; }
+
+            userCritica.peliculas.forEach((element) => {
+                if (element.pelicula == peliId) {
+                    element.remove();
+                }
+            })
+
+            peli.save();
+            userCritica.save();
+            console.log(notaMedia);
+            notaMedia = notaPelicula(peli);
+            if (notaMedia != null) {
+                notaMedia = redondeo(notaMedia, -1);
+            }
+            console.log(notaMedia);
+            let notaUp = {
+                $set: {
+                    nota_media: notaMedia
+                }
+            };
+            Pelicula.findByIdAndUpdate(peliId, notaUp, { new: true }, (err, notaUpdate) => {
+                if (err) {
+                    return res.status(500).send({
+                        message: "Error al guardar la nota media"
+                    });
+                } else {
+                    return res.status(200).send({
+                        message: "Eliminada"
+                    });
+                }
+            });
+        } else {
+            return res.status(500).send({
+                message: "La crítica no existe o no pertenece al usuario"
+            });
+        }
+
+        /*Pelicula.findById(peliId, (err, pelicula) => {
             if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
@@ -444,7 +530,7 @@ const controller = {
                     }
                 });
             }
-        });
+        }); */
 
     },
 
@@ -583,15 +669,6 @@ const controller = {
                     message: "Error al mostrar los datos"
                 });
             } else {
-                /*for (let i = 0; i < pelicula.comentarios; i++) {
-                    if (pelicula.comenatios[i]._id == comentario && pelicula.comentarios[i].usuario == usuarioId) {
-                        element.remove();
-                        console.log('elimina')
-                        status = true;
-                        break;
-                    }
-                }*/
-
                 pelicula.comentarios.forEach((element) => {
                     if (element._id == comentarioId) {
                         if(element.usuario == usuarioId || user.rol == 'admin'){
