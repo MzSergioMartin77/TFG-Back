@@ -11,8 +11,6 @@ const CriticaSchema = new Schema({
     texto: String,
     fecha: Date,
     usuario_model: Number,
-    //like: Number,
-    //dislike: Number,
     usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'}
 });
 
@@ -22,9 +20,6 @@ const ComentarioSchema = new Schema({
     texto: String,
     fecha: Date,
     editado: Boolean,
-    //like: Number,
-    //dislike: Number,
-    //comRespuesta: {type: mongoose.Schema.Types.ObjectId, ref: 'comentario'},
     usuario: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'},
     respuestas: [{type: mongoose.Schema.Types.ObjectId, ref: 'comentario'}]
 })

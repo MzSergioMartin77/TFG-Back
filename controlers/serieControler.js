@@ -158,7 +158,7 @@ const controller = {
     //Coge las 6 series con más nota
     getSeriesP: function (req, res) {
 
-        Serie.find({}).sort({ "nota-media": -1 }).limit(6).exec((err, serie) => {
+        Serie.find({}).sort({ "nota_media": -1 }).limit(6).exec((err, serie) => {
             if (err) {
                 return res.status(500).send({
                     message: "Error al mostrar los datos"
