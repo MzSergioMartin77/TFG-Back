@@ -19,11 +19,10 @@ import tensorflow as tf
 
 ratings_df = pd.read_json(r"C:\Users\Sergi\Documents\Proyectos\TFG\BackTFG\model_tf\datos.json") 
 
-ratings_df.isna().sum()
+# ratings_df.isna().sum()
 
 movie_ids = ratings_df['movieId'].unique()
 movie2idx = {o:i for i,o in enumerate(movie_ids)}
-idx2movie = {i:o for i,o in enumerate(movie_ids)}
 ratings_df.movieId = ratings_df.movieId.apply(lambda x: movie2idx[x])
 
 nmovie_id = ratings_df.movieId.nunique()
